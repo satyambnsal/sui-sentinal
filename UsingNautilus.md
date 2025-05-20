@@ -112,11 +112,11 @@ sh expose_enclave.sh # this exposes port 3000 to the Internet for traffic
 7. Congratulations! You can now interact with the enclave from the outside world. You can find the `PUBLIC_IP` in the AWS console.
 
 ```shell
-curl -H 'Content-Type: application/json' -X GET http://<PUBLIC_IP>:3000/health_check
+curl -H 'Content-Type: application/json' -X GET http://34.224.74.114:3000/health_check
 
-curl -H 'Content-Type: application/json' -X GET http://<PUBLIC_IP>:3000/get_attestation
+curl -H 'Content-Type: application/json' -X GET http://34.224.74.114:3000/get_attestation
 
-curl -H 'Content-Type: application/json' -d '{"payload": { "location": "San Francisco"}}' -X POST http://<PUBLIC_IP>:3000/process_data
+curl -H 'Content-Type: application/json' -d '{"payload": { "location": "San Francisco"}}' -X POST http://34.224.74.114:3000:3000/process_data
 ```
 
 8. Optionally, you can set up an Application Load Balancer (ALB) for the EC2 instance with an SSL/TLS certificate from AWS Certificate Manager (ACM), and configure Amazon Route 53 for DNS routing. For more information, see the [AWS Certificate Manager User Guide](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) and the [Application Load Balancer Guide](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html).
@@ -139,7 +139,7 @@ To test the `process_data` endpoint locally, run the following:
 
 ```shell
 cd src/nautilus-server/
-RUST_LOG=debug API_KEY=045a27812dbe456392913223221306 cargo run
+RUST_LOG=debug API_KEY=515b86f2a79945afad6133032252005 cargo run
 
 curl -H 'Content-Type: application/json' -d '{"payload": { "location": "San Francisco"}}' -X POST http://localhost:3000/process_data
 
