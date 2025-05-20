@@ -1,0 +1,37 @@
+name: Move
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Sui
+        uses: cloudposse-github-actions/install-gh-releases@v1.4.0
+        with:
+          config: |-
+            mystenlabs/sui:
+              platform: ubuntu
+              arch: x86_64
+              extension-matching: true
+            
+      - name: Run move tests
+        run: |
+          for dir in move/*; do
+            echo "Running sui move test in $dir"
+            sui move test --path $dir
+          done
