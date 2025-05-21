@@ -1,27 +1,39 @@
 // Copyright (c), Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
+#![allow(warnings)]
 
 use anyhow::Result;
+use dotenvy::dotenv;
+use std::env;
 use axum::{routing::get, routing::post, Router};
 use fastcrypto::{ed25519::Ed25519KeyPair, traits::KeyPair};
-use nautilus_server::app::process_data;
+use nautilus_server::app::{register_agent, consume_prompt};
 use nautilus_server::common::{get_attestation, health_check};
 use nautilus_server::AppState;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
+use std::collections::HashMap;
+use tokio::sync::RwLock;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
 
 #[tokio::main]
 async fn main() -> Result<()> {
+
+    dotenv().ok();
+        tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::new(
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+        ))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
     let eph_kp = Ed25519KeyPair::generate(&mut rand::thread_rng());
 
-    // This value can be stored with secret-manager. To do that, follow the prompt `sh configure_enclave.sh`
-    // Answer `y` to `Do you want to use a secret?` and finish.
-    // Then uncomment this code instead to fetch from env var API_KEY, which is fetched from secret manager.
-    // let api_key = std::env::var("API_KEY").expect("API_KEY must be set");
-    let api_key = "515b86f2a79945afad6133032252005".to_string();
+    let api_key = std::env::var("API_KEY").expect("API_KEY must be set");
+     println!("API_KEY = {}", api_key);
 
-    let state = Arc::new(AppState { eph_kp, api_key });
+    let state = Arc::new(AppState { eph_kp, api_key, agents: RwLock::new(HashMap::new()) });
 
     // Define your own restricted CORS policy here if needed.
     let cors = CorsLayer::new().allow_methods(Any).allow_headers(Any);
@@ -29,7 +41,8 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .route("/", get(ping))
         .route("/get_attestation", get(get_attestation))
-        .route("/process_data", post(process_data))
+        .route("/register-agent", post(register_agent))
+        .route("/consume-prompt", post(consume_prompt))
         .route("/health_check", get(health_check))
         .with_state(state)
         .layer(cors);

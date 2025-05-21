@@ -112,11 +112,11 @@ sh expose_enclave.sh # this exposes port 3000 to the Internet for traffic
 7. Congratulations! You can now interact with the enclave from the outside world. You can find the `PUBLIC_IP` in the AWS console.
 
 ```shell
-curl -H 'Content-Type: application/json' -X GET http://54.167.34.56:3000:3000/health_check
+curl -H 'Content-Type: application/json' -X GET http://54.162.24.210:3000:3000/health_check
 
-curl -H 'Content-Type: application/json' -X GET http://54.167.34.56:3000:3000/get_attestation
+curl -H 'Content-Type: application/json' -X GET http://54.162.24.210:3000:3000/get_attestation
 
-curl -H 'Content-Type: application/json' -d '{"payload": { "location": "San Francisco"}}' -X POST http://54.167.34.56:3000/process_data
+curl -H 'Content-Type: application/json' -d '{"payload": { "location": "San Francisco"}}' -X POST http://54.162.24.210:3000/process_data
 ```
 
 8. Optionally, you can set up an Application Load Balancer (ALB) for the EC2 instance with an SSL/TLS certificate from AWS Certificate Manager (ACM), and configure Amazon Route 53 for DNS routing. For more information, see the [AWS Certificate Manager User Guide](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) and the [Application Load Balancer Guide](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html).
@@ -182,10 +182,16 @@ cat out/nitro.pcrs
 3a929ea8b96d4076da25e53e740300947e350a72a775735f63f8b0f8112d3ff04d8ccae53f5ec13dd3c05b865ba7b610 PCR1
 21b9efbc184807662e966d34f390821309eeac6802309798826296bf3e8bec7c10edb30948c90ba67310f7b964fc500a PCR2
 
+
+
+9c9c594a947540922ca6f7bfeef88920f27623f767781a06ead37d8eb2b1f1e1540d5553e1efca27940bb2e6a7caa42c PCR0
+9c9c594a947540922ca6f7bfeef88920f27623f767781a06ead37d8eb2b1f1e1540d5553e1efca27940bb2e6a7caa42c PCR1
+21b9efbc184807662e966d34f390821309eeac6802309798826296bf3e8bec7c10edb30948c90ba67310f7b964fc500a PCR2
+
 # Add env var that will be used later when registering the enclave.
-PCR0=3a929ea8b96d4076da25e53e740300947e350a72a775735f63f8b0f8112d3ff04d8ccae53f5ec13dd3c05b865ba7b610
-PCR1=3a929ea8b96d4076da25e53e740300947e350a72a775735f63f8b0f8112d3ff04d8ccae53f5ec13dd3c05b865ba7b610
-PCR2=21b9efbc184807662e966d34f390821309eeac6802309798826296bf3e8bec7c10edb30948c90ba67310f7b964fc500a
+export PCR0=9c9c594a947540922ca6f7bfeef88920f27623f767781a06ead37d8eb2b1f1e1540d5553e1efca27940bb2e6a7caa42c
+export PCR1=9c9c594a947540922ca6f7bfeef88920f27623f767781a06ead37d8eb2b1f1e1540d5553e1efca27940bb2e6a7caa42c
+export PCR2=21b9efbc184807662e966d34f390821309eeac6802309798826296bf3e8bec7c10edb30948c90ba67310f7b964fc500a
 ```
 
 ## Register the enclave onchain
@@ -204,7 +210,7 @@ sui move build
 sui client publish
 
 # record ENCLAVE_PACKAGE_ID as env var from publish output
-ENCLAVE_PACKAGE_ID=0x14e8b4d8b28ee9aa5ea604f3f33969b3d0f03247b51837f27e17bcf875d3582c
+export ENCLAVE_PACKAGE_ID=0x78c9b443cef341ad0a67607aec1f0a8285aaa9c40c156d638ab9566a6dcc7ae9
 
 # deploy your dapp logic
 cd ../app
@@ -213,12 +219,12 @@ sui client publish
 
 # record CAP_OBJECT_ID (owned object of type Cap), ENCLAVE_CONFIG_OBJECT_ID (shared object), EXAMPLES_PACKAGE_ID (package containing weather module) as env var from publish output
 
-CAP_OBJECT_ID=0xb157d241cc00b7a9b8b0f11d0b4c3e11d8334be95f7e50240962611bd802abff
-ENCLAVE_CONFIG_OBJECT_ID=0x58a6a284aaea8c8e71151e4ae0de2350ae877f0bd94adc2b2d0266cf23b6b41d
-EXAMPLES_PACKAGE_ID=0x7e712fd9e5e57d87137440cfea77dc7970575a5c3229d78bb7176ab984d94adf
+export CAP_OBJECT_ID=0x8ae1700c785f4523bd12fea2b75ca680bcde2d04d745faffad394b731fd27a11
+export ENCLAVE_CONFIG_OBJECT_ID=0xe3568fbf180d35541411329adb4d81f671c511d91090bc804f8c82c70f6f25fe
+export EXAMPLES_PACKAGE_ID=0x23896e6c3f4e536a56e713ff8cd76e79f6852114350538d8ff5f0d0a34a3fcdb
 
 # record the deployed enclave url, e.g. http://<PUBLIC_IP>:3000
-ENCLAVE_URL=<DEPLOYED_URL>
+ENCLAVE_URL=http://54.162.24.210:3000
 
 # the module name and otw name used to create the dapp, defined in your Move code `fun init`
 MODULE_NAME=weather
@@ -250,7 +256,7 @@ sui client call --function update_name --module enclave --package $ENCLAVE_PACKA
 sh ../../register_enclave.sh $ENCLAVE_PACKAGE_ID $EXAMPLES_PACKAGE_ID $ENCLAVE_CONFIG_OBJECT_ID $ENCLAVE_URL $MODULE_NAME $OTW_NAME
 
 # record the created shared object ENCLAVE_OBJECT_ID as env var from register output
-ENCLAVE_OBJECT_ID=0xe0e70df5347560a1b43e5954267cadd1386a562095cb4285f2581bf2974c838d
+export ENCLAVE_OBJECT_ID=0x0af203e0983d9c37e94dfad7030028f1215d9c5afe354398552f1ae3bc55164e
 ```
 
 You can view an example of an enclave config object containing PCRs [here](https://testnet.suivision.xyz/object/0x58a6a284aaea8c8e71151e4ae0de2350ae877f0bd94adc2b2d0266cf23b6b41d). Also you can view an example of an enclave object containing the enclave public key [here](https://testnet.suivision.xyz/object/0xe0e70df5347560a1b43e5954267cadd1386a562095cb4285f2581bf2974c838d).

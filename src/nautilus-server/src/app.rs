@@ -6,68 +6,80 @@ use crate::common::{to_signed_response, IntentScope, ProcessDataRequest, Process
 use crate::AppState;
 use crate::EnclaveError;
 use axum::extract::State;
-use axum::Json;
+use axum::{Json, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;
-/// ====
-/// Core Nautilus server logic, replace it with your own
-/// relavant structs and process_data endpoint.
-/// ====
+use uuid::Uuid;
+use crate::{
+    claude,
+    models::{
+        Agent, ConsumePromptRequest, ConsumePromptResponse, ErrorResponse, RegisterAgentRequest,
+        RegisterAgentResponse,
+    }
+};
 
-/// Inner type T for IntentMessage<T>
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct WeatherResponse {
-    pub location: String,
-    pub temperature: u64,
-}
 
-/// Inner type T for ProcessDataRequest<T>
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WeatherRequest {
-    pub location: String,
-}
 
-pub async fn process_data(
+pub async fn register_agent(
     State(state): State<Arc<AppState>>,
-    Json(request): Json<ProcessDataRequest<WeatherRequest>>,
-) -> Result<Json<ProcessedDataResponse<IntentMessage<WeatherResponse>>>, EnclaveError> {
-    let url = format!(
-        "https://api.weatherapi.com/v1/current.json?key={}&q={}",
-        state.api_key, request.payload.location
-    );
-    let response = reqwest::get(url.clone()).await.map_err(|e| {
-        EnclaveError::GenericError(format!("Failed to get weather response: {}", e))
-    })?;
-    let json = response.json::<Value>().await.map_err(|e| {
-        EnclaveError::GenericError(format!("Failed to parse weather response: {}", e))
-    })?;
-    let location = json["location"]["name"].as_str().unwrap_or("Unknown");
-    let temperature = json["current"]["temp_c"].as_f64().unwrap_or(0.0) as u64;
-    let last_updated_epoch = json["current"]["last_updated_epoch"].as_u64().unwrap_or(0);
-    let last_updated_timestamp_ms = last_updated_epoch * 1000_u64;
+    Json(payload): Json<RegisterAgentRequest>,
+) -> Result<Json<ProcessedDataResponse<IntentMessage<RegisterAgentResponse>>>, EnclaveError> {
+    let agent_id = Uuid::new_v4();
+        let current_timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| EnclaveError::GenericError(format!("Failed to get current timestamp: {}", e)))?
+        .as_millis() as u64;
+
+    let agent = Agent {
+        id: agent_id,
+        prompt: payload.prompt,
+    };
+    let mut agents = state.agents.write().await;
+    agents.insert(agent_id, agent);
+    Ok(Json(to_signed_response(&state.eph_kp, RegisterAgentResponse {agent_id}, current_timestamp, IntentScope::AIPrompt)))
+}
+
+pub async fn consume_prompt(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<ConsumePromptRequest>,
+) -> Result<Json<ProcessedDataResponse<IntentMessage<Value>>>, EnclaveError> {
+    let agents = state.agents.write().await;
+
+    let agent = match agents.get(&payload.agent_id) {
+        Some(agent) => agent,
+        None => {
+            return Err(EnclaveError::GenericError(format!(
+                "Agent with ID {} not found",
+                payload.agent_id
+            )));
+        }
+    };
+
+    let evaluation = claude::evaluate_prompt(&agent.prompt, &payload.message, &state.api_key)
+        .await
+        .map_err(|e| EnclaveError::GenericError(format!("Failed to evaluate prompt: {}", e)))?;
+    let evaluation_json = serde_json::to_value(evaluation)
+    .map_err(|e| EnclaveError::GenericError(format!("Failed to serialize evaluation: {}", e)))?;
+
+    // Get timestamp
     let current_timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_err(|e| EnclaveError::GenericError(format!("Failed to get current timestamp: {}", e)))?
         .as_millis() as u64;
 
-    // 1 hour in milliseconds = 60 * 60 * 1000 = 3_600_000
-    if last_updated_timestamp_ms + 3_600_000 < current_timestamp {
-        return Err(EnclaveError::GenericError(
-            "Weather API timestamp is too old".to_string(),
-        ));
-    }
-
-    Ok(Json(to_signed_response(
+    let response = to_signed_response(
         &state.eph_kp,
-        WeatherResponse {
-            location: location.to_string(),
-            temperature,
-        },
-        last_updated_timestamp_ms,
-        IntentScope::Weather,
-    )))
+        evaluation_json,
+        current_timestamp,
+        IntentScope::AIPrompt,
+    );
+
+    Ok(Json(response))
 }
+
+
+
 
 #[cfg(test)]
 mod test {
