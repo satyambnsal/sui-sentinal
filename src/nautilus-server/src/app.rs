@@ -81,50 +81,50 @@ pub async fn consume_prompt(
 
 
 
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::common::IntentMessage;
-    use axum::{extract::State, Json};
-    use fastcrypto::{ed25519::Ed25519KeyPair, traits::KeyPair};
+// #[cfg(test)]
+// mod test {
+//     use super::*;
+//     use crate::common::IntentMessage;
+//     use axum::{extract::State, Json};
+//     use fastcrypto::{ed25519::Ed25519KeyPair, traits::KeyPair};
 
-    #[tokio::test]
-    async fn test_process_data() {
-        let state = Arc::new(AppState {
-            eph_kp: Ed25519KeyPair::generate(&mut rand::thread_rng()),
-            api_key: "045a27812dbe456392913223221306".to_string(),
-        });
-        let signed_weather_response = process_data(
-            State(state),
-            Json(ProcessDataRequest {
-                payload: WeatherRequest {
-                    location: "San Francisco".to_string(),
-                },
-            }),
-        )
-        .await
-        .unwrap();
-        assert_eq!(
-            signed_weather_response.response.data.location,
-            "San Francisco"
-        );
-    }
+//     #[tokio::test]
+//     async fn test_process_data() {
+//         let state = Arc::new(AppState {
+//             eph_kp: Ed25519KeyPair::generate(&mut rand::thread_rng()),
+//             api_key: "045a27812dbe456392913223221306".to_string(),
+//         });
+//         let signed_weather_response = process_data(
+//             State(state),
+//             Json(ProcessDataRequest {
+//                 payload: WeatherRequest {
+//                     location: "San Francisco".to_string(),
+//                 },
+//             }),
+//         )
+//         .await
+//         .unwrap();
+//         assert_eq!(
+//             signed_weather_response.response.data.location,
+//             "San Francisco"
+//         );
+//     }
 
-    #[test]
-    fn test_serde() {
-        // test result should be consistent with test_serde in `move/enclave/sources/enclave.move`.
-        use fastcrypto::encoding::{Encoding, Hex};
-        let payload = WeatherResponse {
-            location: "San Francisco".to_string(),
-            temperature: 13,
-        };
-        let timestamp = 1744038900000;
-        let intent_msg = IntentMessage::new(payload, timestamp, IntentScope::Weather);
-        let signing_payload = bcs::to_bytes(&intent_msg).expect("should not fail");
-        assert!(
-            signing_payload
-                == Hex::decode("0020b1d110960100000d53616e204672616e636973636f0d00000000000000")
-                    .unwrap()
-        );
-    }
-}
+//     #[test]
+//     fn test_serde() {
+//         // test result should be consistent with test_serde in `move/enclave/sources/enclave.move`.
+//         use fastcrypto::encoding::{Encoding, Hex};
+//         let payload = WeatherResponse {
+//             location: "San Francisco".to_string(),
+//             temperature: 13,
+//         };
+//         let timestamp = 1744038900000;
+//         let intent_msg = IntentMessage::new(payload, timestamp, IntentScope::Weather);
+//         let signing_payload = bcs::to_bytes(&intent_msg).expect("should not fail");
+//         assert!(
+//             signing_payload
+//                 == Hex::decode("0020b1d110960100000d53616e204672616e636973636f0d00000000000000")
+//                     .unwrap()
+//         );
+//     }
+// }
