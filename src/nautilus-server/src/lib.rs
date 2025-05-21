@@ -1,22 +1,28 @@
 // Copyright (c), Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
+#![allow(warnings)]
 
+use crate::models::Agent;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use axum::Json;
 use fastcrypto::ed25519::Ed25519KeyPair;
 use serde_json::json;
+use std::collections::HashMap;
+use tokio::sync::RwLock;
+use uuid::Uuid;
 
 pub mod app;
+pub mod claude;
 pub mod common;
+pub mod models;
 
-/// App state, at minimum needs to maintain the ephemeral keypair.  
+#[derive(Debug)]
 pub struct AppState {
-    /// Ephemeral keypair on boot
     pub eph_kp: Ed25519KeyPair,
-    /// API key when querying api.weatherapi.com
     pub api_key: String,
+    pub agents: RwLock<HashMap<Uuid, Agent>>,
 }
 
 /// Implement IntoResponse for EnclaveError.
