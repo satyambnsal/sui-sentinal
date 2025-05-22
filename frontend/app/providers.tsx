@@ -20,17 +20,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   )
   const networks = {
-    devnet: { url: getFullnodeUrl('devnet') },
     testnet: { url: getFullnodeUrl('testnet') },
-    mainnet: { url: getFullnodeUrl('mainnet') },
   }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider
-        networks={networks}
-        defaultNetwork="testnet"
-      >
+      <SuiClientProvider networks={networks} defaultNetwork="testnet">
         <WalletProvider>
           <div className="bg-[url('/img/abstract_bg.png')] bg-cover bg-repeat-y">
             <Header />

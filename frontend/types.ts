@@ -31,3 +31,17 @@ export type RegisterAgentApiResponse = {
   }
   signature: string
 }
+
+export type ConsumePromptApiResponse = {
+  response: {
+    intent: number
+    timestamp_ms: number
+    data: {
+      agent_id: string
+      success: boolean
+      explanation: string
+      score: number
+    }
+  }
+  signature: string
+}

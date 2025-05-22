@@ -218,3 +218,12 @@ export const byteArrayFromString = (targetString: string) => {
     pending_word_len: pendingWordLength
   };
 }
+
+
+export const hexToVector = (hex: string): number[] => {
+  const bytes: number[] = []
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes.push(parseInt(hex.slice(i, i + 2), 16))
+  }
+  return bytes
+}
