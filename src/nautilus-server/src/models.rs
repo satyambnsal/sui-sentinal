@@ -31,7 +31,6 @@ pub struct ConsumePromptRequest {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConsumePromptResponse {
     pub agent_id: String,
-    pub user_prompt: String,
     pub success: bool,
     pub explanation: String,
     pub score: u8,

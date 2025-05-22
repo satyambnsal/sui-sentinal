@@ -24,8 +24,8 @@ struct ClaudeContent {
 
 fn sanitize_explanation(text: &str) -> String {
     text.chars()
-        .filter(|c| c.is_alphanumeric() || c.is_whitespace())
-        .take(150)
+        .filter(|c| c.is_ascii_alphabetic() || *c == ' ') // Only A-Z, a-z, and space
+        .take(120)
         .collect::<String>()
         .trim()
         .to_string()
@@ -142,7 +142,6 @@ Now evaluate this user message:"#,
             Err(_) => {
                 return Ok(ConsumePromptResponse {
                     agent_id: agent_id.to_string(),
-                    user_prompt: user_message.to_string(),
                     success: false,
                     explanation: sanitize_explanation("Failed to parse API response"),
                     score: 0,
@@ -152,7 +151,6 @@ Now evaluate this user message:"#,
         Err(_) => {
             return Ok(ConsumePromptResponse {
                 agent_id: agent_id.to_string(),
-                user_prompt: user_message.to_string(),
                 success: false,
                 explanation: sanitize_explanation("Failed to call Claude API"),
                 score: 0,
@@ -188,7 +186,6 @@ Now evaluate this user message:"#,
 
             Ok(ConsumePromptResponse {
                 agent_id: agent_id.to_string(),
-                user_prompt: user_message.to_string(),
                 success,
                 explanation: sanitized_explanation,
                 score,
@@ -199,7 +196,6 @@ Now evaluate this user message:"#,
 
             Ok(ConsumePromptResponse {
                 agent_id: agent_id.to_string(),
-                user_prompt: user_message.to_string(),
                 success,
                 explanation: sanitize_explanation(&format!("Parsing error Raw response {}", response_text)),
                 score: 0,

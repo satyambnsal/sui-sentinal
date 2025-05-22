@@ -84,7 +84,6 @@ pub async fn consume_prompt(
     .await
     .unwrap_or_else(|_| ConsumePromptResponse {
         agent_id: payload.agent_id.clone(),
-        user_prompt: payload.message.clone(),
         success: false,
         explanation: "Failed to evaluate prompt".to_string(),
         score: 0,
