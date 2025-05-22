@@ -1,25 +1,30 @@
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Agent {
-    pub id: Uuid,
-    pub prompt: String,
+    pub id: String,
+    pub system_prompt: String,
+    pub cost_per_message: u64,
+    pub is_defeated: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegisterAgentRequest {
-    pub prompt: String,
+    pub system_prompt: String,
+    pub cost_per_message: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RegisterAgentResponse {
-    pub agent_id: Uuid,
+    pub agent_id: String,
+    pub cost_per_message: u64,
+    pub system_prompt: String,
+    pub is_defeated: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ConsumePromptRequest {
-    pub agent_id: Uuid,
+    pub agent_id: String,
     pub message: String,
 }
 

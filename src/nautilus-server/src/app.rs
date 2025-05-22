@@ -25,19 +25,33 @@ pub async fn register_agent(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<RegisterAgentRequest>,
 ) -> Result<Json<ProcessedDataResponse<IntentMessage<RegisterAgentResponse>>>, EnclaveError> {
-    let agent_id = Uuid::new_v4();
-        let current_timestamp = std::time::SystemTime::now()
+    let agent_id = (Uuid::new_v4()).to_string();
+    let current_timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_err(|e| EnclaveError::GenericError(format!("Failed to get current timestamp: {}", e)))?
         .as_millis() as u64;
 
     let agent = Agent {
-        id: agent_id,
-        prompt: payload.prompt,
+        id: agent_id.clone(),
+        system_prompt: payload.system_prompt.clone(),
+        cost_per_message: payload.cost_per_message,
+        is_defeated: false,
     };
+    
     let mut agents = state.agents.write().await;
-    agents.insert(agent_id, agent);
-    Ok(Json(to_signed_response(&state.eph_kp, RegisterAgentResponse {agent_id}, current_timestamp, IntentScope::AIPrompt)))
+    agents.insert(agent_id.clone(), agent);
+    
+    Ok(Json(to_signed_response(
+        &state.eph_kp, 
+        RegisterAgentResponse {
+            agent_id: agent_id.to_string(),
+            cost_per_message: payload.cost_per_message,
+            system_prompt: payload.system_prompt,
+            is_defeated: false,
+        }, 
+        current_timestamp, 
+        IntentScope::AIPrompt
+    )))
 }
 
 pub async fn consume_prompt(
@@ -56,7 +70,7 @@ pub async fn consume_prompt(
         }
     };
 
-    let evaluation = claude::evaluate_prompt(&agent.prompt, &payload.message, &state.api_key)
+    let evaluation = claude::evaluate_prompt(&agent.system_prompt, &payload.message, &state.api_key)
         .await
         .map_err(|e| EnclaveError::GenericError(format!("Failed to evaluate prompt: {}", e)))?;
     let evaluation_json = serde_json::to_value(evaluation)

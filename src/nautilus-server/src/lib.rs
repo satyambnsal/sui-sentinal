@@ -11,7 +11,6 @@ use fastcrypto::ed25519::Ed25519KeyPair;
 use serde_json::json;
 use std::collections::HashMap;
 use tokio::sync::RwLock;
-use uuid::Uuid;
 
 pub mod app;
 pub mod claude;
@@ -22,7 +21,7 @@ pub mod models;
 pub struct AppState {
     pub eph_kp: Ed25519KeyPair,
     pub api_key: String,
-    pub agents: RwLock<HashMap<Uuid, Agent>>,
+    pub agents: RwLock<HashMap<String, Agent>>,
 }
 
 /// Implement IntoResponse for EnclaveError.
