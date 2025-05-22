@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     let api_key = std::env::var("API_KEY").expect("API_KEY must be set");
      println!("API_KEY = {}", api_key);
 
-    let state = Arc::new(AppState { eph_kp, api_key, agents: RwLock::new(HashMap::new()) });
+    let state = Arc::new(AppState { eph_kp, api_key, agents: RwLock::new(HashMap::new()), agent_counter: RwLock::new(0) });
 
     // Define your own restricted CORS policy here if needed.
     let cors = CorsLayer::new().allow_methods(Any).allow_headers(Any);

@@ -25,7 +25,11 @@ pub async fn register_agent(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<RegisterAgentRequest>,
 ) -> Result<Json<ProcessedDataResponse<IntentMessage<RegisterAgentResponse>>>, EnclaveError> {
-    let agent_id = (Uuid::new_v4()).to_string();
+    let agent_id = {
+        let mut counter = state.agent_counter.write().await;
+        *counter += 1;
+        counter.to_string()
+    };
     let current_timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_err(|e| EnclaveError::GenericError(format!("Failed to get current timestamp: {}", e)))?
@@ -50,14 +54,14 @@ pub async fn register_agent(
             is_defeated: false,
         }, 
         current_timestamp, 
-        IntentScope::AIPrompt
+        IntentScope::RegisterAgent
     )))
 }
 
 pub async fn consume_prompt(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<ConsumePromptRequest>,
-) -> Result<Json<ProcessedDataResponse<IntentMessage<Value>>>, EnclaveError> {
+) -> Result<Json<ProcessedDataResponse<IntentMessage<ConsumePromptResponse>>>, EnclaveError> {
     let agents = state.agents.write().await;
 
     let agent = match agents.get(&payload.agent_id) {
@@ -70,11 +74,22 @@ pub async fn consume_prompt(
         }
     };
 
-    let evaluation = claude::evaluate_prompt(&agent.system_prompt, &payload.message, &state.api_key)
-        .await
-        .map_err(|e| EnclaveError::GenericError(format!("Failed to evaluate prompt: {}", e)))?;
-    let evaluation_json = serde_json::to_value(evaluation)
-    .map_err(|e| EnclaveError::GenericError(format!("Failed to serialize evaluation: {}", e)))?;
+    // Updated function call with agent_id parameter
+    let evaluation = claude::evaluate_prompt(
+        &payload.agent_id,
+        &agent.system_prompt,
+        &payload.message,
+        &state.api_key
+    )
+    .await
+    .unwrap_or_else(|_| ConsumePromptResponse {
+        agent_id: payload.agent_id.clone(),
+        user_prompt: payload.message.clone(),
+        success: false,
+        explanation: "Failed to evaluate prompt".to_string(),
+        score: 0,
+    });
+
 
     // Get timestamp
     let current_timestamp = std::time::SystemTime::now()
@@ -84,11 +99,11 @@ pub async fn consume_prompt(
 
     let response = to_signed_response(
         &state.eph_kp,
-        evaluation_json,
+        evaluation,
         current_timestamp,
-        IntentScope::AIPrompt,
+        IntentScope::ConsumePrompt,
     );
-
+    
     Ok(Json(response))
 }
 

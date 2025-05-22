@@ -30,10 +30,11 @@ pub struct ConsumePromptRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConsumePromptResponse {
+    pub agent_id: String,
+    pub user_prompt: String,
     pub success: bool,
     pub explanation: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub score: Option<u8>,
+    pub score: u8,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

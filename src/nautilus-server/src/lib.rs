@@ -22,6 +22,7 @@ pub struct AppState {
     pub eph_kp: Ed25519KeyPair,
     pub api_key: String,
     pub agents: RwLock<HashMap<String, Agent>>,
+    pub agent_counter: RwLock<u64>,
 }
 
 /// Implement IntoResponse for EnclaveError.
