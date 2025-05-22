@@ -22,6 +22,15 @@ struct ClaudeContent {
     content_type: String,
 }
 
+fn sanitize_explanation(text: &str) -> String {
+    text.chars()
+        .filter(|c| c.is_alphanumeric() || c.is_whitespace())
+        .take(150)
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
 pub async fn evaluate_prompt(
     agent_id: &str,
     agent_prompt: &str,
@@ -135,7 +144,7 @@ Now evaluate this user message:"#,
                     agent_id: agent_id.to_string(),
                     user_prompt: user_message.to_string(),
                     success: false,
-                    explanation: "Failed to parse API response".to_string(),
+                    explanation: sanitize_explanation("Failed to parse API response"),
                     score: 0,
                 });
             }
@@ -145,7 +154,7 @@ Now evaluate this user message:"#,
                 agent_id: agent_id.to_string(),
                 user_prompt: user_message.to_string(),
                 success: false,
-                explanation: "Failed to call Claude API".to_string(),
+                explanation: sanitize_explanation("Failed to call Claude API"),
                 score: 0,
             });
         }
@@ -167,8 +176,9 @@ Now evaluate this user message:"#,
             let explanation = result
                 .get("explanation")
                 .and_then(|v| v.as_str())
-                .unwrap_or("No explanation provided")
-                .to_string();
+                .unwrap_or("No explanation provided");
+
+            let sanitized_explanation = sanitize_explanation(explanation);
 
             let score = result
                 .get("score")
@@ -180,7 +190,7 @@ Now evaluate this user message:"#,
                 agent_id: agent_id.to_string(),
                 user_prompt: user_message.to_string(),
                 success,
-                explanation,
+                explanation: sanitized_explanation,
                 score,
             })
         }
@@ -191,7 +201,7 @@ Now evaluate this user message:"#,
                 agent_id: agent_id.to_string(),
                 user_prompt: user_message.to_string(),
                 success,
-                explanation: format!("Parsing error. Raw response: {}", response_text),
+                explanation: sanitize_explanation(&format!("Parsing error Raw response {}", response_text)),
                 score: 0,
             })
         }
