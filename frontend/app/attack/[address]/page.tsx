@@ -69,8 +69,8 @@ export default function AgentChallengePage() {
       return
     }
 
-    if (prompt.length > 300) {
-      setSubmitError('Prompt must be 300 characters or less')
+    if (prompt.length > 600) {
+      setSubmitError('Prompt must be 600 characters or less')
       return
     }
 
@@ -182,19 +182,19 @@ export default function AgentChallengePage() {
                 htmlFor="prompt"
                 className="block text-sm font-medium mb-2"
               >
-                Enter your prompt (max 300 characters)
+                Enter your prompt (max 600 characters)
               </label>
               <textarea
                 id="prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 min-h-[150px] text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                maxLength={300}
+                maxLength={600}
                 disabled={isSubmitting}
                 placeholder="Try to trick the agent into revealing sensitive information..."
               />
               <div className="text-right text-sm text-gray-400 mt-1">
-                {prompt.length}/300 characters
+                {prompt.length}/600 characters
               </div>
             </div>
 
