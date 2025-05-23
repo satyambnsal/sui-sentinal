@@ -12,11 +12,11 @@ import { AgentDetails, ConsumePromptApiResponse } from '@/types'
 import { AgentInfo } from '@/components/AgentInfo'
 import { AgentStatus } from '@/types'
 import { getAgentStatus } from '@/lib/utils'
+import { AttackStatusModal } from '@/components/AttackStatusModal'
 
 export default function AgentChallengePage() {
   const params = useParams()
   const agentObjectId = params.address as string
-  console.log('agent object id', agentObjectId)
   const account = useCurrentAccount()
 
   const { refetchAgent } = useAllAgents()
@@ -24,6 +24,7 @@ export default function AgentChallengePage() {
     showToasts: true,
     onApiSuccess: (response) => {
       setApiResponse(response)
+      setShowResultModal(true)
     },
   })
 
@@ -35,6 +36,7 @@ export default function AgentChallengePage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>(AgentStatus.ACTIVE)
   const [apiResponse, setApiResponse] = useState<ConsumePromptApiResponse | null>(null)
+  const [showResultModal, setShowResultModal] = useState(false)
 
   // Fetch agent details when component mounts or objectId changes
   useEffect(() => {
@@ -172,33 +174,11 @@ export default function AgentChallengePage() {
         </div>
       </div>
 
-      {apiResponse && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-900 rounded-lg p-6 mb-8"
-        >
-          <h2 className="text-2xl font-bold mb-4">
-            {apiResponse.response.data.success ? (
-              <span className="text-green-400">Attack Successful! 🎉</span>
-            ) : (
-              <span className="text-yellow-400">Attack Failed</span>
-            )}
-          </h2>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Explanation</h3>
-              <p className="bg-gray-800 p-4 rounded">{apiResponse.response.data.explanation}</p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Score</h3>
-              <p className="text-xl">{apiResponse.response.data.score}/10</p>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      <AttackStatusModal
+        apiResponse={apiResponse}
+        showResultModal={showResultModal}
+        setShowResultModal={setShowResultModal}
+      />
 
       {agentStatus === AgentStatus.ACTIVE && (
         <motion.div
