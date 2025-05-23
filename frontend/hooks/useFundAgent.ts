@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
 import { Transaction } from '@mysten/sui/transactions'
 import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { MIST_PER_SUI, SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
 
-const GAS_BUDGET = 10_000
+const GAS_BUDGET = 1_000_000
 const GAS_OBJECT_MIN_BALANCE = BigInt(GAS_BUDGET) * BigInt(2)
 
 interface UseFundAgentOptions {
@@ -66,13 +67,14 @@ export const useFundAgent = (options: UseFundAgentOptions = {}) => {
         const coins = await client.getCoins({
           owner: account.address,
           coinType: '0x2::sui::SUI',
+          limit: 100,
         })
 
         if (!coins.data.length) {
           throw new Error('No SUI coins found in wallet')
         }
 
-        const amountInMist = BigInt(amount * MIST_PER_SUI)
+        const amountInMist = BigInt(Math.floor(amount * MIST_PER_SUI))
         const totalNeeded = amountInMist + GAS_OBJECT_MIN_BALANCE
 
         // Sort coins by balance (largest first)
@@ -83,8 +85,13 @@ export const useFundAgent = (options: UseFundAgentOptions = {}) => {
           (sum, coin) => sum + BigInt(coin.balance),
           BigInt(0)
         )
+        console.log('Amount needed (SUI):', amount)
+        console.log('Gas needed (SUI):', Number(GAS_OBJECT_MIN_BALANCE) / MIST_PER_SUI)
+        console.log('Total needed (SUI):', Number(totalNeeded) / MIST_PER_SUI)
+        console.log('Total available (SUI):', Number(totalAvailable) / MIST_PER_SUI)
 
         if (totalAvailable < totalNeeded) {
+          console.log({ totalAvailable, totalNeeded })
           throw new Error(
             `Insufficient SUI balance. Need ${amount} SUI + gas fees, have ${
               Number(totalAvailable) / MIST_PER_SUI
@@ -92,42 +99,19 @@ export const useFundAgent = (options: UseFundAgentOptions = {}) => {
           )
         }
 
-        console.log({ totalAvailable, totalNeeded, amountInMist })
-
         // Create transaction
         const tx = new Transaction()
 
-        // Find the best gas coin (smallest coin that can cover gas)
-        let gasCoin = null
-        const availablePaymentCoins = []
+        const largestCoin = sortedCoins[0]
+        const largestBalance = BigInt(largestCoin.balance)
 
-        // First pass: find smallest suitable gas coin
-        for (const coin of sortedCoins.slice().reverse()) {
-          // Start from smallest
-          const balance = BigInt(coin.balance)
-          if (!gasCoin && balance >= GAS_OBJECT_MIN_BALANCE) {
-            gasCoin = coin
-            console.log(`Selected gas coin ${coin.coinObjectId} with balance`, balance)
-          } else {
-            availablePaymentCoins.push(coin)
-          }
-        }
+        if (largestBalance >= totalNeeded) {
+          console.log('✅ Using single coin for both payment and gas')
 
-        // If no suitable gas coin found, use the largest coin for both gas and payment
-        if (!gasCoin) {
-          console.log('No dedicated gas coin found, will use largest coin for both')
-          const largestCoin = sortedCoins[0]
-          const largestBalance = BigInt(largestCoin.balance)
+          // Split exact payment amount from largest coin
+          const [paymentCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountInMist)])
 
-          if (largestBalance < totalNeeded) {
-            throw new Error('Largest coin insufficient for payment + gas')
-          }
-
-          // Split payment amount from the largest coin first
-          const [paymentCoin] = tx.splitCoins(largestCoin.coinObjectId, [tx.pure.u64(amountInMist)])
-
-          // Now the original coin has reduced balance but still enough for gas
-          // Set gas payment using the now-reduced original coin
+          // Use remaining balance in original coin for gas
           tx.setGasPayment([
             {
               objectId: largestCoin.coinObjectId,
@@ -136,91 +120,81 @@ export const useFundAgent = (options: UseFundAgentOptions = {}) => {
             },
           ])
 
-          // Call the fund_agent function
+          // Call fund_agent function
           tx.moveCall({
             target: `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::fund_agent`,
             arguments: [tx.object(agentObjectId), paymentCoin],
           })
         } else {
-          console.log('Using separate coins for gas and payment')
-          // We have a dedicated gas coin, now handle payment coins
+          console.log('📋 Need multiple coins - using merge strategy')
 
-          // Calculate total available for payment
-          const paymentTotal = availablePaymentCoins.reduce(
-            (sum, coin) => sum + BigInt(coin.balance),
-            BigInt(0)
-          )
-
-          if (paymentTotal < amountInMist) {
-            throw new Error(`Insufficient SUI balance for payment. Need ${amount} SUI`)
-          }
-
-          // Select payment coins
-          const selectedPaymentCoins = []
+          // Merge coins to create a single large coin
+          const selectedCoins = []
           let runningTotal = BigInt(0)
 
-          for (const coin of availablePaymentCoins.sort(
-            (a, b) => Number(b.balance) - Number(a.balance)
-          )) {
-            selectedPaymentCoins.push(coin)
+          // Select minimum coins needed for total amount
+          for (const coin of sortedCoins) {
+            selectedCoins.push(coin)
             runningTotal += BigInt(coin.balance)
-            if (runningTotal >= amountInMist) break
+            if (runningTotal >= totalNeeded) break
           }
 
           console.log(
-            `Selected ${selectedPaymentCoins.length} payment coins with total`,
-            runningTotal
+            `Merging ${selectedCoins.length} coins with total: ${
+              Number(runningTotal) / MIST_PER_SUI
+            } SUI`
           )
 
-          let paymentCoin
-          if (selectedPaymentCoins.length === 1) {
-            const singleCoin = selectedPaymentCoins[0]
-            const coinBalance = BigInt(singleCoin.balance)
+          if (selectedCoins.length === 1) {
+            // Single coin, use it directly
+            const singleCoin = selectedCoins[0]
+            const [paymentCoin] = tx.splitCoins(singleCoin.coinObjectId, [
+              tx.pure.u64(amountInMist),
+            ])
 
-            if (coinBalance === amountInMist) {
-              // Exact amount
-              paymentCoin = singleCoin.coinObjectId
-            } else {
-              // Need to split
-              const [splitCoin] = tx.splitCoins(singleCoin.coinObjectId, [
-                tx.pure.u64(amountInMist),
-              ])
-              paymentCoin = splitCoin
-            }
+            tx.setGasPayment([
+              {
+                objectId: singleCoin.coinObjectId,
+                version: singleCoin.version,
+                digest: singleCoin.digest,
+              },
+            ])
+
+            tx.moveCall({
+              target: `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::fund_agent`,
+              arguments: [tx.object(agentObjectId), paymentCoin],
+            })
           } else {
-            // Multiple payment coins - merge then split if needed
-            const primaryCoin = selectedPaymentCoins[0].coinObjectId
-            const coinsToMerge = selectedPaymentCoins.slice(1).map((coin) => coin.coinObjectId)
+            // Multiple coins - merge them first
+            const primaryCoin = selectedCoins[0]
+            const coinsToMerge = selectedCoins.slice(1)
 
-            // Merge all coins into the primary coin
-            if (coinsToMerge.length > 0) {
-              tx.mergeCoins(primaryCoin, coinsToMerge)
-            }
+            // Merge all selected coins into the primary coin
+            tx.mergeCoins(
+              primaryCoin.coinObjectId,
+              coinsToMerge.map((coin) => coin.coinObjectId)
+            )
 
-            if (runningTotal === amountInMist) {
-              // Exact amount after merging
-              paymentCoin = primaryCoin
-            } else {
-              // Split exact amount after merging
-              const [splitCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(amountInMist)])
-              paymentCoin = splitCoin
-            }
+            // Now the primary coin has the merged balance
+            // Split payment amount from the merged coin
+            const [paymentCoin] = tx.splitCoins(primaryCoin.coinObjectId, [
+              tx.pure.u64(amountInMist),
+            ])
+
+            // Use remaining merged balance for gas
+            tx.setGasPayment([
+              {
+                objectId: primaryCoin.coinObjectId,
+                version: primaryCoin.version,
+                digest: primaryCoin.digest,
+              },
+            ])
+
+            tx.moveCall({
+              target: `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::fund_agent`,
+              arguments: [tx.object(agentObjectId), paymentCoin],
+            })
           }
-
-          // Set gas payment (separate from payment coins)
-          tx.setGasPayment([
-            {
-              objectId: gasCoin.coinObjectId,
-              version: gasCoin.version,
-              digest: gasCoin.digest,
-            },
-          ])
-
-          // Call the fund_agent function
-          tx.moveCall({
-            target: `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::fund_agent`,
-            arguments: [tx.object(agentObjectId), paymentCoin],
-          })
         }
 
         // Execute transaction with promise-based approach
