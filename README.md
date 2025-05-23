@@ -254,10 +254,4 @@ sui-sentinel/
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-**Built with ❤️ for the future of AI security and blockchain gaming**
-
-_Sui Sentinel - Where AI meets blockchain in the ultimate test of digital warfare_
+This project is licensed under the APACHE License - see the LICENSE file for details.
