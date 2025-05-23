@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -12,6 +13,8 @@ import { toast } from 'react-toastify'
 import { hexToVector } from '@/lib/utils'
 import { useFundAgent } from '@/hooks/useFundAgent'
 import { useConsumePrompt } from '@/hooks/useConsumePrompt'
+import { registerAgentUtil } from './utils'
+import { useAgentObjectIds } from '@/hooks/useAgentObjectIds'
 
 const MIST_PER_SUI = 1_000_000_000
 const GAS_BUDGET = 10_000_000
@@ -67,29 +70,13 @@ const FormInput: React.FC<FormInputProps> = ({
   )
 }
 
-const registerAgent = async (systemPrompt: string, feePerMessage: string) => {
-  const response = await fetch('/api/register-agent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system_prompt: systemPrompt,
-      cost_per_message: parseFloat(feePerMessage),
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to register agent: ${response.status}`)
-  }
-
-  return response.json()
-}
-
 export default function DefendPage() {
   const client = useSuiClient()
   const router = useRouter()
   const account = useCurrentAccount()
   const { fundAgent } = useFundAgent()
   const { consumePrompt } = useConsumePrompt()
+  const { addAgentObjectId } = useAgentObjectIds()
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction({
     execute: async ({ bytes, signature }) =>
       await client.executeTransactionBlock({
@@ -176,7 +163,6 @@ export default function DefendPage() {
   const createAgentTransaction = async (agentDetails: any) => {
     const tx = new Transaction()
     const sigVector = hexToVector(agentDetails.signature)
-    // const keypair = new Ed25519Keypair()
 
     tx.moveCall({
       target: `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::register_agent`,
@@ -199,17 +185,29 @@ export default function DefendPage() {
     return await signAndExecuteTransaction(
       { transaction: tx },
       {
-        onSuccess: (result) => {
+        onSuccess: async (result) => {
           console.log('RESULT', result)
           console.log('object changes', result.objectChanges)
           // setDigest(result.digest)
           toast.success(`Agent deployed successfully! ${result.digest.toString()}`)
 
-          // Redirect to agent page
-          const agentId = agentDetails?.response?.data?.agent_id
-          if (agentId) {
-            router.push(`/attack/${agentId}`)
+          const agentObject = result?.objectChanges?.find(
+            (obj: any) =>
+              obj.objectType ===
+              `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::Agent`
+          )
+          if (agentObject) {
+            console.log('agent obhect', agentObject)
+            const agentObjectId = (agentObject as any).objectId
+            await addAgentObjectId(agentObjectId)
+            console.log('Object id added to db successfully')
           }
+
+          // Redirect to agent page
+          // const agentId = agentDetails?.response?.data?.agent_id
+          // if (agentId) {
+          //   router.push(`/attack/${agentId}`)
+          // }
         },
       }
     )
@@ -227,7 +225,7 @@ export default function DefendPage() {
       // await sendFunds()
 
       toast.info('Registering agent...')
-      const agentDetails = await registerAgent(formData.systemPrompt, formData.feePerMessage)
+      const agentDetails = await registerAgentUtil(formData.systemPrompt, formData.feePerMessage)
 
       toast.info('Creating blockchain transaction...')
       await createAgentTransaction(agentDetails)
@@ -294,7 +292,6 @@ export default function DefendPage() {
           placeholder="0.00"
           required
         />
-
         <FormInput
           label="Initial Balance (SUI)"
           name="initialBalance"
@@ -305,7 +302,6 @@ export default function DefendPage() {
           placeholder="0.00"
           required
         />
-
         <button
           type="submit"
           disabled={isLoading}
