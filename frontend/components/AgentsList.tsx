@@ -7,6 +7,8 @@ import CountdownTimer from './CountdownTimer'
 import { AgentStatus } from '@/types'
 
 import { useRouter } from 'next/navigation'
+import { useFundAgentModal } from '@/hooks/useFundAgentModal'
+import { useCurrentAccount } from '@mysten/dapp-kit'
 
 export enum TabType {
   AgentRanking = 'AGENT_RANKING',
@@ -24,11 +26,18 @@ export const AgentsList = ({
   onRefreshAgent: (objectId: string) => Promise<AgentDetails>
 }) => {
   const router = useRouter()
+  const account = useCurrentAccount()
+
+  const isAgentOwner = (agentCreator: string) => {
+    return agentCreator === account?.address
+  }
+
   const handleRefresh = async (e: React.MouseEvent, objectId: string) => {
     e.preventDefault()
     e.stopPropagation()
     await onRefreshAgent(objectId)
   }
+  const { Modal, openModal } = useFundAgentModal()
 
   return (
     <AnimatePresence mode="wait">
@@ -87,7 +96,10 @@ export const AgentsList = ({
                             <span className="font-medium overflow-hidden">{agent.agent_id}</span>
                           </div>
                           {agentStatus === AgentStatus.ACTIVE && (
-                            <CountdownTimer endTime={0} size="sm" />
+                            <CountdownTimer
+                              endTime={0}
+                              size="sm"
+                            />
                           )}
                           {agentStatus === AgentStatus.DEFEATED && (
                             <div className="w-24 flex justify-center text-xs font-semibold bg-[#FF3F26]/20 text-[#FF3F26] py-1 rounded-full">
@@ -131,9 +143,19 @@ export const AgentsList = ({
                         </div>
                         <div className="col-span-3 ps-4">{`${balance} SUI`}</div>
                         <div className="col-span-2 ps-4">{`${costPerMessage} SUI`}</div>
+                        <div>
+                          {isAgentOwner(agent.creator) && (
+                            <button onClick={() => openModal(agent.agent_object_id)}>
+                              Fund Agent
+                            </button>
+                          )}
+                        </div>
                         <div className="col-span-2 ps-4">
                           {agentStatus === AgentStatus.ACTIVE && (
-                            <CountdownTimer endTime={0} size="md" />
+                            <CountdownTimer
+                              endTime={0}
+                              size="md"
+                            />
                           )}
                           {agentStatus === AgentStatus.DEFEATED && (
                             <div className="w-32 flex justify-center text-center text-sm font-bold tracking-wider bg-[#FF3F26]/20 text-[#FF3F26] py-2 rounded-full">
@@ -174,6 +196,7 @@ export const AgentsList = ({
           </>
         )}
       </motion.div>
+      <Modal onSuccess={() => console.log('Funded successfully!')} />
     </AnimatePresence>
   )
 }

@@ -11,6 +11,7 @@ import { toast } from 'react-toastify'
 import { hexToVector } from '@/lib/utils'
 import { registerAgentUtil } from './utils'
 import { useAgentObjectIds } from '@/hooks/useAgentObjectIds'
+import { FundAgentModal } from '@/components/FundAgentModal'
 
 const MIST_PER_SUI = 1_000_000_000
 const GAS_BUDGET = 10_000_000
@@ -19,7 +20,6 @@ interface FormData {
   agentName: string
   systemPrompt: string
   feePerMessage: string
-  initialBalance: string
 }
 
 interface FormInputProps {
@@ -88,11 +88,13 @@ export default function DefendPage() {
     agentName: '',
     systemPrompt: '',
     feePerMessage: '',
-    initialBalance: '',
   })
 
   const [errors, setErrors] = useState<Partial<FormData>>({})
   const [isLoading, setIsLoading] = useState(false)
+
+  const [deployedAgentObjectId, setDeployedAgentObjectId] = useState<string | null>(null)
+  const [showFundModal, setShowFundModal] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -102,6 +104,15 @@ export default function DefendPage() {
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: '' }))
     }
+  }
+
+  const handleCloseFundModal = () => {
+    setShowFundModal(false)
+    setDeployedAgentObjectId(null)
+  }
+
+  const handleFundSuccess = () => {
+    toast.success('Agent funded successfully!')
   }
 
   const validateForm = (): boolean => {
@@ -122,11 +133,6 @@ export default function DefendPage() {
       newErrors.feePerMessage = 'Fee must be a positive number'
     }
 
-    const balance = parseFloat(formData.initialBalance)
-    if (isNaN(balance) || balance < 0) {
-      newErrors.initialBalance = 'Initial balance must be a positive number'
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -144,7 +150,7 @@ export default function DefendPage() {
       throw new Error('No SUI coins found in wallet')
     }
 
-    const amountInMist = BigInt(parseFloat(formData.initialBalance) * MIST_PER_SUI)
+    const amountInMist = BigInt(parseFloat('1') * MIST_PER_SUI)
     const tx = new Transaction()
 
     const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountInMist)])
@@ -194,6 +200,9 @@ export default function DefendPage() {
             console.log('agent obhect', agentObject)
             const agentObjectId = (agentObject as any).objectId
             await addAgentObjectId(agentObjectId)
+            setDeployedAgentObjectId(agentObjectId)
+            setShowFundModal(true)
+            toast.success('Agent deployed! Now fund your agent.')
             console.log('Object id added to db successfully')
           }
 
@@ -244,7 +253,10 @@ export default function DefendPage() {
 
   return (
     <div className="container mx-auto px-4 py-4 pt-24 min-h-[calc(100vh-60px)]">
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 relative">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-2xl mx-auto space-y-6 relative"
+      >
         <Link
           href="/"
           className="hidden lg:flex items-center gap-1 text-gray-400 hover:text-white transition-colors absolute top-2 -left-32"
@@ -286,16 +298,6 @@ export default function DefendPage() {
           placeholder="0.00"
           required
         />
-        <FormInput
-          label="Initial Balance (SUI)"
-          name="initialBalance"
-          value={formData.initialBalance}
-          onChange={handleChange}
-          error={errors.initialBalance}
-          type="number"
-          placeholder="0.00"
-          required
-        />
         <button
           type="submit"
           disabled={isLoading}
@@ -311,6 +313,15 @@ export default function DefendPage() {
           )}
         </button>
       </form>
+
+      {deployedAgentObjectId && (
+        <FundAgentModal
+          open={showFundModal}
+          onClose={handleCloseFundModal}
+          agentObjectId={deployedAgentObjectId}
+          onSuccess={handleFundSuccess}
+        />
+      )}
     </div>
   )
 }

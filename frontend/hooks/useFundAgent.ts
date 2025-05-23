@@ -5,7 +5,7 @@ import { SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
 
 const MIST_PER_SUI = 1_000_000_000
-const GAS_BUDGET = 10_000_000
+const GAS_BUDGET = 50_000_000
 
 interface UseFundAgentOptions {
   onSuccess?: (result: any) => void
