@@ -9,7 +9,7 @@ interface UseAllAgentsReturn {
   loading: boolean
   error: string | null
   refetchAll: () => Promise<void>
-  refetchAgent: (objectId: string) => Promise<void>
+  refetchAgent: (objectId: string) => Promise<AgentDetails>
 }
 
 export const useAllAgents = (): UseAllAgentsReturn => {
@@ -88,6 +88,7 @@ export const useAllAgents = (): UseAllAgentsReturn => {
             agent.agent_id === updatedAgent.agent_id ? updatedAgent : agent
           )
         )
+        return updatedAgent
       } catch (error) {
         console.error(`Error refetching agent ${objectId}:`, error)
         throw new Error(`Failed to refetch agent ${objectId}`)
