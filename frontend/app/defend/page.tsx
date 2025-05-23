@@ -321,6 +321,7 @@ export default function DefendPage() {
         onAddFunds={handleAddFunds}
         agentName={formData.agentName}
         transactionDigest={transactionDigest}
+        agentObjectId={deployedAgentObjectId}
       />
 
       {/* Fund Modal */}

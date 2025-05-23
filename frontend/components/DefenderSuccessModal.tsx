@@ -1,6 +1,6 @@
-import { SUI_TESTNET_BASE_URL } from "@/constants"
-import { CheckCircle, X } from "lucide-react"
-import Link from "next/link"
+import { SUI_TESTNET_BASE_URL } from '@/constants'
+import { CheckCircle, X } from 'lucide-react'
+import Link from 'next/link'
 
 interface SuccessModalProps {
   open: boolean
@@ -8,6 +8,7 @@ interface SuccessModalProps {
   onAddFunds: () => void
   agentName: string
   transactionDigest: string
+  agentObjectId: string // ✅
 }
 
 export const SuccessModal: React.FC<SuccessModalProps> = ({
@@ -16,6 +17,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   onAddFunds,
   agentName,
   transactionDigest,
+  agentObjectId,
 }) => {
   if (!open) return null
 
@@ -59,13 +61,16 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
             >
               Add Funds Now
             </button>
-
-            <button
-              onClick={onClose}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white rounded-lg py-3 font-medium transition-colors"
-            >
-              Skip for Now
-            </button>
+            <div className="w-full">
+              <Link
+                href={`/attack/${agentObjectId}`}
+                className="w-full"
+              >
+                <button className="w-full bg-gray-600 hover:bg-gray-700 text-white rounded-lg py-3 font-medium transition-colors">
+                  Skip for Now
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
