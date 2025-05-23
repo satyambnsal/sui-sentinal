@@ -36,35 +36,6 @@ export const ConnectButton = ({ className = '', showAddress = true }: ConnectBut
     }
   }
 
-  // const printClient = async () => {
-  //   const response = await client.getObject({
-  //     id: '0x3f9f1d7cbbdefd6f545df900ddd70a571dc2d2117d5cbf36912815708fe74b5e',
-  //     options: {
-  //       showContent: true,
-  //       showType: true,
-  //     },
-  //   })
-
-  //   console.log('response from clint', response)
-
-  //   if (response.data?.content?.dataType === 'moveObject') {
-  //     const fields = (response.data.content as any).fields
-  //     const result = {
-  //       id: fields.id.id,
-  //       agents: fields.agents.fields || {},
-  //     }
-
-  //     console.log('result', result)
-  //     // console.log)
-  //     console.log('agents', fields.agents.fields)
-  //     console.log('agent first', fields.agents.fields.agent1)
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   printClient()
-  // })
-
   useEffect(() => {
     const fetchBalance = async () => {
       if (!account?.address) return
@@ -136,45 +107,6 @@ export const ConnectButton = ({ className = '', showAddress = true }: ConnectBut
                         <span className="text-sm font-medium text-[#FAFAFA]">
                           {`${suiBalance} SUI`}
                         </span>
-                        {/* <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  addFunds.showAddFundsModal()
-                                }}
-                                className="hover:text-[#FFFFFF] transition-colors"
-                              >
-                                <div className="w-4 h-4 bg-[#FFFFFF] rounded-full flex items-center justify-center hover:bg-[#D0D0D0] transition-colors">
-                                  <svg
-                                    width="10"
-                                    height="10"
-                                    viewBox="0 0 10 10"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M5 2V8"
-                                      stroke="#1A1B1F"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                    />
-                                    <path
-                                      d="M2 5H8"
-                                      stroke="#1A1B1F"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                    />
-                                  </svg>
-                                </div>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Add funds</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider> */}
                       </div>
                     </div>
 
@@ -183,14 +115,7 @@ export const ConnectButton = ({ className = '', showAddress = true }: ConnectBut
                       <span className="text-sm font-medium text-[#FAFAFA]">
                         {formatAddress(account.address)}
                       </span>
-                      {copied ? (
-                        <Check
-                          size={14}
-                          className="text-[#58F083]"
-                        />
-                      ) : (
-                        <Copy size={14} />
-                      )}
+                      {copied ? <Check size={14} className="text-[#58F083]" /> : <Copy size={14} />}
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>

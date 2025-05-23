@@ -1,8 +1,6 @@
 'use client'
 
-import { AgentListView } from '@/components/AgentListView'
 import { LandingPage } from '@/components/LandingPage'
-import { TEXT_COPIES } from '@/constants'
 
 export default function Home() {
   return (

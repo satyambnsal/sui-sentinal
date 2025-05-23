@@ -5,7 +5,7 @@ import { AgentDetails } from '@/types'
 import { formatBalance, getAgentStatus } from '@/lib/utils'
 import CountdownTimer from './CountdownTimer'
 import { AgentStatus } from '@/types'
-import Link from 'next/link'
+
 import { useRouter } from 'next/navigation'
 
 export enum TabType {

@@ -20,6 +20,7 @@ export const fetchAgentDetailsViaObject = async (
       throw new Error('Invalid agent object')
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fields = (response.data.content as any).fields
     console.log('Agent fields:', fields)
 
