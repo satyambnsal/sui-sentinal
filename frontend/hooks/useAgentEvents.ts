@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react'
-import { SuiEvent } from '@mysten/sui.js/types'
 import { useSuiClient } from '@mysten/dapp-kit'
 import { SuiClient } from '@mysten/sui/client'
 import { SUI_CONFIG } from '@/constants'
 
 export interface AgentEvents {
-  agentDefeated: SuiEvent[]
-  promptConsumed: SuiEvent[]
+  agentDefeated: any[]
+  promptConsumed: any[]
 }
 
 interface UseAgentEventsResult {
