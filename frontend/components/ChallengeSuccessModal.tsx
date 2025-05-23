@@ -4,8 +4,7 @@ import { Loader2, X, Clock, ExternalLink, ChevronDown, ChevronUp } from 'lucide-
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
 import { useState, useEffect } from 'react'
-import { ACTIVE_NETWORK } from '@/constants'
-import Image from 'next/image'
+import { EXPLORER_BASE_URL } from '@/constants'
 import { motion } from 'framer-motion'
 
 interface PromptData {
@@ -36,27 +35,26 @@ interface ChallengeSuccessModalProps {
   promptError: string | null
 }
 
-export const ChallengeSuccessModal = ({ 
-  open, 
-  onClose, 
-  verificationStatus, 
+export const ChallengeSuccessModal = ({
+  open,
+  onClose,
+  verificationStatus,
   transactionLanded,
   agentAddress = '',
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   agentName = '',
   transactionHash,
   promptConsumedTxHash,
-  tweetId,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   promptId,
   promptData,
   isLoadingPrompt,
-  promptError
+  promptError,
 }: ChallengeSuccessModalProps) => {
   const { width, height } = useWindowSize()
   const [showConfetti, setShowConfetti] = useState(false)
   const [showResponse, setShowResponse] = useState(false)
-  
+
   // Show confetti when challenge is successful
   useEffect(() => {
     if (verificationStatus === 'success') {
@@ -69,13 +67,7 @@ export const ChallengeSuccessModal = ({
 
   const handleViewTransaction = (txHash: string | null) => {
     if (txHash) {
-      window.open(`${ACTIVE_NETWORK.explorer}/tx/${txHash}`, '_blank')
-    }
-  }
-
-  const handleViewTweet = () => {
-    if (tweetId) {
-      window.open(`https://x.com/i/status/${tweetId}`, '_blank')
+      window.open(`${EXPLORER_BASE_URL}/digest/${txHash}`, '_blank')
     }
   }
 
@@ -95,23 +87,23 @@ export const ChallengeSuccessModal = ({
         </div>
       )
     }
-    
+
     // Only show error if there's no response and it's not a drain
-    if (promptError && (!promptData?.response && !promptData?.is_drain)) {
+    if (promptError && !promptData?.response && !promptData?.is_drain) {
       return (
         <div className="mt-4 p-3 bg-red-900/20 rounded-lg border border-red-500/20">
           <p className="text-sm text-red-300">Error loading response: {promptError}</p>
         </div>
       )
     }
-    
+
     if (promptData) {
       return (
         <div className="mt-4 space-y-3">
           {promptData.response && (
             <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-              <div 
-                className="flex items-center justify-between cursor-pointer" 
+              <div
+                className="flex items-center justify-between cursor-pointer"
                 onClick={() => setShowResponse(!showResponse)}
               >
                 <h4 className="text-sm font-medium text-gray-300">Agent Response:</h4>
@@ -123,15 +115,15 @@ export const ChallengeSuccessModal = ({
                   )}
                 </button>
               </div>
-              
+
               {showResponse && (
                 <p className="text-sm text-white whitespace-pre-wrap mt-2">{promptData.response}</p>
               )}
             </div>
           )}
-          
+
           {/* Only show error if there's no response and it's not a drain */}
-          {promptData.error && (!promptData.response && !promptData.is_drain) && (
+          {promptData.error && !promptData.response && !promptData.is_drain && (
             <div className="p-3 bg-red-900/20 rounded-lg border border-red-500/20">
               <h4 className="text-sm font-medium text-red-300 mb-1">Error:</h4>
               <p className="text-sm text-red-200 whitespace-pre-wrap">{promptData.error}</p>
@@ -140,7 +132,7 @@ export const ChallengeSuccessModal = ({
         </div>
       )
     }
-    
+
     return null
   }
 
@@ -157,36 +149,34 @@ export const ChallengeSuccessModal = ({
           />
         </div>
       )}
-      <motion.div 
+      <motion.div
         className="p-6 space-y-6 relative"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <button 
+        <button
           onClick={handleClose}
           className="absolute top-0 right-0 p-2 text-gray-400 hover:text-white transition-colors duration-200"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
-        
+
         <div className="text-center">
           {!transactionLanded ? (
             <div>
               <div className="mb-4 flex justify-center">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)'
+                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)',
                   }}
                 >
                   <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mb-2">
-                Submitting Challenge...
-              </h2>
+              <h2 className="text-2xl font-bold mb-2">Submitting Challenge...</h2>
               <p className="text-white/90 mb-4">
                 Your transaction is being processed. Please wait while we confirm your submission.
               </p>
@@ -194,18 +184,16 @@ export const ChallengeSuccessModal = ({
           ) : verificationStatus === 'loading' ? (
             <div>
               <div className="mb-4 flex justify-center">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)'
+                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)',
                   }}
                 >
                   <Clock className="w-8 h-8 text-blue-600" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mb-2">
-                Processing Challenge
-              </h2>
+              <h2 className="text-2xl font-bold mb-2">Processing Challenge</h2>
               <div className="bg-blue-100/10 p-4 rounded-lg border border-blue-500/20 mb-4 shadow-glow-blue">
                 <p className="text-white/90 mb-2">
                   Your challenge has been successfully submitted and is being processed.
@@ -226,10 +214,10 @@ export const ChallengeSuccessModal = ({
           ) : verificationStatus === 'success' ? (
             <div>
               <div className="mb-4 flex justify-center">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(34, 197, 94, 0.6)'
+                    boxShadow: '0 0 20px rgba(34, 197, 94, 0.6)',
                   }}
                 >
                   <svg
@@ -248,9 +236,7 @@ export const ChallengeSuccessModal = ({
                   </svg>
                 </div>
               </div>
-              <h2 className="text-3xl font-bold mb-3 text-green-500">
-                Challenge Successful!
-              </h2>
+              <h2 className="text-3xl font-bold mb-3 text-green-500">Challenge Successful!</h2>
               <div className="bg-green-100/10 p-4 rounded-lg border border-green-500/20 mb-4 shadow-glow-green">
                 <p className="text-white/90">
                   Congratulations! You successfully drained the agent and claimed the reward.
@@ -261,10 +247,10 @@ export const ChallengeSuccessModal = ({
           ) : verificationStatus === 'failed' ? (
             <div>
               <div className="mb-4 flex justify-center">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(239, 68, 68, 0.6)'
+                    boxShadow: '0 0 20px rgba(239, 68, 68, 0.6)',
                   }}
                 >
                   <svg
@@ -283,12 +269,11 @@ export const ChallengeSuccessModal = ({
                   </svg>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mb-3 text-red-500">
-                Challenge Failed
-              </h2>
+              <h2 className="text-2xl font-bold mb-3 text-red-500">Challenge Failed</h2>
               <div className="bg-red-100/10 p-4 rounded-lg border border-red-500/20 mb-4 shadow-glow-red">
                 <p className="text-white/90 mb-2">
-                  Nice try, but this agent is tougher than it looks! Ready to sharpen your skills and try again?
+                  Nice try, but this agent is tougher than it looks! Ready to sharpen your skills
+                  and try again?
                 </p>
               </div>
               {renderPromptResponse()}
@@ -296,10 +281,10 @@ export const ChallengeSuccessModal = ({
           ) : verificationStatus === 'tries_exceeded' ? (
             <div>
               <div className="mb-4 flex justify-center">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(234, 179, 8, 0.6)'
+                    boxShadow: '0 0 20px rgba(234, 179, 8, 0.6)',
                   }}
                 >
                   <svg
@@ -318,12 +303,12 @@ export const ChallengeSuccessModal = ({
                   </svg>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mb-3 text-yellow-500">
-                Verification Timeout
-              </h2>
+              <h2 className="text-2xl font-bold mb-3 text-yellow-500">Verification Timeout</h2>
               <div className="bg-yellow-100/10 p-4 rounded-lg border border-yellow-500/20 mb-4 shadow-glow-yellow">
                 <p className="text-white/90">
-                  We couldn&apos;t verify the result of your challenge. The transaction was submitted, but verification attempts exceeded the limit. Check your tweet for a response and report this if needed.
+                  We couldn&apos;t verify the result of your challenge. The transaction was
+                  submitted, but verification attempts exceeded the limit. Check your tweet for a
+                  response and report this if needed.
                 </p>
               </div>
               {renderPromptResponse()}
@@ -331,10 +316,10 @@ export const ChallengeSuccessModal = ({
           ) : (
             <div>
               <div className="mb-4 flex justify-center">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)'
+                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)',
                   }}
                 >
                   <svg
@@ -353,13 +338,11 @@ export const ChallengeSuccessModal = ({
                   </svg>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mb-3">
-                Challenge Submitted!
-              </h2>
+              <h2 className="text-2xl font-bold mb-3">Challenge Submitted!</h2>
               <div className="bg-blue-100/10 p-4 rounded-lg border border-blue-500/20 mb-4 shadow-glow-blue">
                 <p className="text-white/90">
-                  Your challenge has been successfully submitted. The agent will respond to your tweet in
-                  few seconds.
+                  Your challenge has been successfully submitted. The agent will respond to your
+                  tweet in few seconds.
                 </p>
               </div>
               {renderPromptResponse()}
@@ -386,11 +369,11 @@ export const ChallengeSuccessModal = ({
               onClick={(e) => {
                 // If success, delay navigation to allow confetti to be visible
                 if (verificationStatus === 'success') {
-                  e.preventDefault();
+                  e.preventDefault()
                   // Wait for confetti to be visible before navigating
                   setTimeout(() => {
-                    window.location.href = '/attack';
-                  }, 10000);
+                    window.location.href = '/attack'
+                  }, 10000)
                 }
               }}
             >
@@ -406,16 +389,8 @@ export const ChallengeSuccessModal = ({
             </Link>
           </div>
         </div>
-        
+
         <div className="flex flex-col gap-2 mt-4">
-          {tweetId && (
-            <button
-              onClick={handleViewTweet}
-              className="text-white-400 hover:text-white-300 flex items-center justify-center gap-1.5 mx-auto text-sm transition-opacity duration-300"
-            >
-              View your tweet on <Image src="/icons/x.svg" width={14} height={14} alt="X" className="opacity-80" />
-            </button>
-          )}
           {promptConsumedTxHash && (
             <button
               onClick={() => handleViewTransaction(promptConsumedTxHash)}

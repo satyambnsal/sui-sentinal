@@ -21,7 +21,7 @@ export const AgentsList = ({
 }: {
   agents: AgentDetails[]
   isFetchingAgents: boolean
-  onRefreshAgent: (objectId: string) => Promise<void>
+  onRefreshAgent: (objectId: string) => Promise<AgentDetails>
 }) => {
   const router = useRouter()
   const handleRefresh = async (e: React.MouseEvent, objectId: string) => {

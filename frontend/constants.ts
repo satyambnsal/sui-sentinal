@@ -3,7 +3,6 @@ export const DEFAULT_RPC_URL = 'https://api.cartridge.gg/x/starknet/sepolia'
 export const RPC_NODE_URL = DEFAULT_RPC_URL
 export const AGENT_REGISTRY_ADDRESS =
   '0x02f6574e5b2e998e58dae9c256c8413d5bd4a9850a5f8162afe824b69cffeee7'
-export const X_BOT_NAME = '@teeception'
 
 export const INDEXER_BASE_URL = process.env.NEXT_PUBLIC_INDEXER_BASE_URL || 'http://localhost:4000'
 
@@ -34,3 +33,5 @@ export const SUI_CONFIG = {
   ENCLAVE_OBJECT_ID: '0x5bc7b3dbe25f61535578e05b9c1979c197cf1962afff8d129de16483b1fd05d1',
   AGENT_OBJECT_IDS: ['0xd6784e19fa6dd18f4a6f3c7c14e405f2208d223a18cc852bfbef6c7b3bf88ff5'],
 }
+
+export const EXPLORER_BASE_URL = 'https://testnet.suivision.xyz'
