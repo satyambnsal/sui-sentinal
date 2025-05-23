@@ -8,7 +8,7 @@ import { useCurrentAccount } from '@mysten/dapp-kit'
 import { motion } from 'framer-motion'
 import { useAllAgents } from '@/hooks/useAllAgents'
 import { useConsumePrompt } from '@/hooks/useConsumePrompt'
-import { AgentDetails } from '@/types'
+import { AgentDetails, ConsumePromptApiResponse } from '@/types'
 import { AgentInfo } from '@/components/AgentInfo'
 import { AgentStatus } from '@/types'
 import { getAgentStatus } from '@/lib/utils'
@@ -20,7 +20,12 @@ export default function AgentChallengePage() {
   const account = useCurrentAccount()
 
   const { refetchAgent } = useAllAgents()
-  const { consumePrompt } = useConsumePrompt()
+  const { consumePrompt } = useConsumePrompt({
+    showToasts: true,
+    onApiSuccess: (response) => {
+      setApiResponse(response)
+    },
+  })
 
   const [agent, setAgent] = useState<AgentDetails | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,6 +34,7 @@ export default function AgentChallengePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>(AgentStatus.ACTIVE)
+  const [apiResponse, setApiResponse] = useState<ConsumePromptApiResponse | null>(null)
 
   // Fetch agent details when component mounts or objectId changes
   useEffect(() => {
@@ -77,6 +83,7 @@ export default function AgentChallengePage() {
     try {
       setIsSubmitting(true)
       setSubmitError(null)
+      setApiResponse(null)
 
       await consumePrompt({
         agentDetails: agent,
@@ -147,7 +154,7 @@ export default function AgentChallengePage() {
         <div className="grid grid-cols-1 mb-6">
           <AgentInfo
             balance={agent.balance.toString()}
-            decimal={9} // Assuming SUI decimals
+            decimal={9}
             promptPrice={agent.cost_per_message.toString()}
             symbol="SUI"
             className="w-full !ml-0"
@@ -164,6 +171,34 @@ export default function AgentChallengePage() {
           </div>
         </div>
       </div>
+
+      {apiResponse && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-900 rounded-lg p-6 mb-8"
+        >
+          <h2 className="text-2xl font-bold mb-4">
+            {apiResponse.response.data.success ? (
+              <span className="text-green-400">Attack Successful! 🎉</span>
+            ) : (
+              <span className="text-yellow-400">Attack Failed</span>
+            )}
+          </h2>
+
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Explanation</h3>
+              <p className="bg-gray-800 p-4 rounded">{apiResponse.response.data.explanation}</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Score</h3>
+              <p className="text-xl">{apiResponse.response.data.score}/10</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {agentStatus === AgentStatus.ACTIVE && (
         <motion.div
