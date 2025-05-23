@@ -10,10 +10,6 @@ export default function Home() {
       <div className="min-h-screen flex flex-col justify-center">
         <LandingPage />
       </div>
-      <AgentListView
-        heading={TEXT_COPIES.leaderboard.heading}
-        subheading={TEXT_COPIES.leaderboard.subheading}
-      />
       <div className="md:py-20">
         <div className="px-8 md:py-20 max-w-[1560px] mx-auto hidden">
           <p className="text-4xl md:text-[48px] font-bold text-center uppercase mb-1">

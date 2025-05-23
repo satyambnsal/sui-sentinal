@@ -21,14 +21,11 @@ export const LandingPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <h2 className="text-[#B8B8B8] text-[40px] uppercase">#Teeception</h2>
+          <h2 className="text-[#B8B8B8] text-[40px] uppercase">#Sui Sentinel</h2>
           <p className="">
             Compete for real SUI rewards by challenging agents or creating your own
           </p>
-          <Stats
-            isLoading={loading}
-            data={data}
-          />
+          {/* <Stats isLoading={loading} data={data} /> */}
         </motion.div>
 
         <div className="grid grid-cols-2 justify-center mt-8 text-center gap-9 ">
@@ -108,12 +105,7 @@ export const LandingPage = () => {
 
             <div className="flex items-center justify-center gap-2 my-2">
               <div>
-                <Image
-                  src="/icons/swords.png"
-                  width={24}
-                  height={24}
-                  alt="local police icon"
-                />
+                <Image src="/icons/swords.png" width={24} height={24} alt="local police icon" />
               </div>
               <p className="text-lg lg:text-[2rem] leading-normal font-medium">ATTACK</p>
             </div>

@@ -70,7 +70,7 @@ const fetchAgentDetailsViaObject = async (
       creator: fields.creator,
       cost_per_message: Number(fields.cost_per_message),
       system_prompt: fields.system_prompt,
-      balance: Number(fields.balance?.fields?.value || 0), // Balance might be nested
+      balance: Number(fields.balance),
     }
   } catch (error) {
     console.error('Error fetching agent via getObject:', error)
@@ -100,43 +100,6 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
         },
       }),
   })
-
-  // Step 1: Fetch agent details
-  // const fetchAgentDetails = async (agentObjectId: string): Promise<AgentDetails> => {
-  //   if (!account?.address) {
-  //     throw new Error('Wallet not connected')
-  //   }
-
-  //   const tx = new Transaction()
-
-  //   tx.moveCall({
-  //     target: `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::get_agent_details`,
-  //     arguments: [tx.object(agentObjectId)],
-  //   })
-
-  //   const { results } = await client.devInspectTransactionBlock({
-  //     sender: normalizeSuiAddress(account.address),
-  //     transactionBlock: tx,
-  //   })
-
-  //   const agentDetailsData = results?.[0]?.returnValues?.[0]?.[0]
-  //   console.log('Agent details data', agentDetailsData)
-  //   if (!agentDetailsData) {
-  //     throw new Error('Failed to fetch agent details')
-  //   }
-
-  //   // Parse the BCS response
-  //   const bytes = Uint8Array.from(agentDetailsData)
-  //   const decoded = AgentDetailsLayout.parse(bytes)
-
-  //   return {
-  //     agent_id: decoded.agent_id,
-  //     creator: decoded.creator,
-  //     cost_per_message: Number(decoded.cost_per_message),
-  //     system_prompt: decoded.system_prompt,
-  //     balance: Number(decoded.balance),
-  //   }
-  // }
 
   // Step 2: Transfer payment to agent creator
   const transferPayment = async (agentDetails: AgentDetails): Promise<any> => {
