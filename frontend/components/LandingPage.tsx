@@ -1,11 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Stats } from './Stats'
-import { useUsageStats } from '@/hooks/useUsageStats'
 import { AnimatePresence, motion } from 'framer-motion'
 
 export const LandingPage = () => {
-  const { loading, data } = useUsageStats()
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -25,7 +22,6 @@ export const LandingPage = () => {
           <p className="">
             Compete for real SUI rewards by challenging agents or creating your own
           </p>
-          {/* <Stats isLoading={loading} data={data} /> */}
         </motion.div>
 
         <div className="grid grid-cols-2 justify-center mt-8 text-center gap-9 ">
