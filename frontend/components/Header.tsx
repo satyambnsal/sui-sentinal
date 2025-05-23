@@ -8,7 +8,7 @@ import { MenuItems } from './MenuItems'
 import { MenuIcon, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { ConnectButton } from './ConnectButton'
-import { SUI_FAUCET_URL } from '@/constants'
+import { PROJECT_GITHUB_URL, SUI_FAUCET_URL } from '@/constants'
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -46,7 +46,7 @@ export const Header = () => {
           >
             <Image
               src={'/icons/shield.svg'}
-              width={40}
+              width={32}
               height={44}
               alt="shield"
             />
@@ -63,6 +63,7 @@ export const Header = () => {
         >
           Need SUI ?
         </a>
+
         <div className="hidden xl:block">
           <ConnectButton />
         </div>
@@ -73,6 +74,19 @@ export const Header = () => {
         >
           {menuOpen ? <Plus className="rotate-45 block" /> : <MenuIcon />}
         </button>
+
+        <Link
+          className="block ml-1 xl:ml-4 flex-shrink-0"
+          href={PROJECT_GITHUB_URL}
+          target="_blank"
+        >
+          <Image
+            src={'/icons/github.svg'}
+            width={32}
+            height={32}
+            alt="shield"
+          />
+        </Link>
       </div>
       {menuOpen && (
         <div className="xl:hidden px-[11px] pb-4">
