@@ -45,3 +45,12 @@ export type ConsumePromptApiResponse = {
   }
   signature: string
 }
+
+export interface AgentDetails {
+  agent_id: string
+  agent_object_id: string
+  creator: string
+  cost_per_message: number
+  system_prompt: string
+  balance: number
+}

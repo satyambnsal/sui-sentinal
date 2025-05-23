@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { ApiResponse } from '../app/api/agent-object-id/types'
 
-interface UseStringsReturn {
+interface UseAgentObjectIdsReturn {
   agentObjectIds: string[]
   loading: boolean
   error: string | null
@@ -9,7 +9,7 @@ interface UseStringsReturn {
   refetch: () => Promise<void>
 }
 
-export function useAgentObjectIds(): UseStringsReturn {
+export function useAgentObjectIds(): UseAgentObjectIdsReturn {
   const [agentObjectIds, setAgentObjectIds] = useState<string[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)

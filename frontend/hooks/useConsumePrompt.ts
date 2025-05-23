@@ -1,25 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
 import { Transaction } from '@mysten/sui/transactions'
 import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
-import { bcs } from '@mysten/sui/bcs'
-import { normalizeSuiAddress } from '@mysten/sui/utils'
-import { ConsumePromptApiResponse } from '@/types'
+import { AgentDetails, ConsumePromptApiResponse } from '@/types'
 import { hexToVector } from '@/lib/utils'
-import { SuiClient } from '@mysten/sui/client'
+import { fetchAgentDetailsViaObject } from '@/lib/sui-utils'
 
 const MIST_PER_SUI = 1_000_000_000
 const GAS_BUDGET = 50_000_000
 
 // Define response types
-interface AgentDetails {
-  agent_id: string
-  creator: string
-  cost_per_message: number
-  system_prompt: string
-  balance: number
-}
 
 interface UseConsumePromptOptions {
   onSuccess?: (result: any) => void
@@ -32,50 +24,6 @@ interface UseConsumePromptOptions {
 interface ConsumePromptParams {
   agentObjectId: string
   message: string
-}
-
-// BCS layout for agent details response
-const AgentDetailsLayout = bcs.struct('AgentDetails', {
-  agent_id: bcs.string(),
-  creator: bcs.Address,
-  cost_per_message: bcs.u64(),
-  system_prompt: bcs.string(),
-  balance: bcs.u64(),
-})
-
-const fetchAgentDetailsViaObject = async (
-  client: SuiClient,
-  agentObjectId: string
-): Promise<AgentDetails> => {
-  try {
-    const response = await client.getObject({
-      id: agentObjectId,
-      options: {
-        showContent: true,
-        showType: true,
-      },
-    })
-
-    console.log('Agent object response:', response)
-
-    if (!response.data?.content || response.data.content.dataType !== 'moveObject') {
-      throw new Error('Invalid agent object')
-    }
-
-    const fields = (response.data.content as any).fields
-    console.log('Agent fields:', fields)
-
-    return {
-      agent_id: fields.agent_id,
-      creator: fields.creator,
-      cost_per_message: Number(fields.cost_per_message),
-      system_prompt: fields.system_prompt,
-      balance: Number(fields.balance),
-    }
-  } catch (error) {
-    console.error('Error fetching agent via getObject:', error)
-    throw new Error('Failed to fetch agent details via object query')
-  }
 }
 
 export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
@@ -217,7 +165,7 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
           onSuccess: (result) => {
             console.log('Consume prompt transaction success:', result)
             setLastResult(result)
-            onSuccess?.(result, wasDefeated)
+            onSuccess?.(result)
             resolve(result)
           },
           onError: (txError) => {
