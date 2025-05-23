@@ -4,7 +4,7 @@ import { Loader2, X } from 'lucide-react'
 import { Dialog } from '@/components/Dialog'
 import { useFundAgent } from '@/hooks/useFundAgent' // Adjust import path as needed
 
-interface FundAgentModalProps {
+export interface FundAgentModalProps {
   /** Whether the modal is open */
   open: boolean
   /** Callback when the modal should close */
