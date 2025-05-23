@@ -35,3 +35,4 @@ export const SUI_CONFIG = {
 }
 
 export const EXPLORER_BASE_URL = 'https://testnet.suivision.xyz'
+export const MIST_PER_SUI = 1_000_000_000

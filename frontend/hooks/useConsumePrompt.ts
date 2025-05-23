@@ -7,7 +7,6 @@ import { toast } from 'react-toastify'
 import { AgentDetails, ConsumePromptApiResponse } from '@/types'
 import { hexToVector } from '@/lib/utils'
 
-const MIST_PER_SUI = 1_000_000_000
 const GAS_BUDGET = 50_000_000
 
 // Define response types
@@ -66,9 +65,7 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
     const totalNeeded = costInMist + gasBuffer
 
     if (totalBalance < totalNeeded) {
-      throw new Error(
-        `Insufficient balance. Need ${agentDetails.cost_per_message / MIST_PER_SUI} SUI + gas fees`
-      )
+      throw new Error(`Insufficient balance. Need ${agentDetails.cost_per_message} MIST + gas fees`)
     }
 
     const tx = new Transaction()

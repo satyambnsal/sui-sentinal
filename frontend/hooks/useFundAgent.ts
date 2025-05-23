@@ -1,11 +1,10 @@
 import { useState, useCallback } from 'react'
 import { Transaction } from '@mysten/sui/transactions'
 import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
-import { SUI_CONFIG } from '@/constants'
+import { MIST_PER_SUI, SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
 
-const MIST_PER_SUI = 1_000_000_000
-const GAS_BUDGET = 50_000_000
+const GAS_BUDGET = 10_000_000
 
 interface UseFundAgentOptions {
   onSuccess?: (result: any) => void
@@ -43,6 +42,7 @@ export const useFundAgent = (options: UseFundAgentOptions = {}) => {
 
   const fundAgent = useCallback(
     async ({ agentObjectId, amount }: FundAgentParams) => {
+      console.log({ agentObjectId, amount })
       if (!account?.address) {
         const errorMsg = 'Wallet not connected'
         setError(errorMsg)

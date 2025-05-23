@@ -6,15 +6,12 @@ import { ChevronLeft, Loader2 } from 'lucide-react'
 import { Transaction } from '@mysten/sui/transactions'
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
 import { ConnectPrompt } from '@/components/ConnectPrompt'
-import { SUI_CONFIG, TREASURY_ADDRESS } from '@/constants'
+import { MIST_PER_SUI, SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
 import { hexToVector } from '@/lib/utils'
 import { registerAgentUtil } from './utils'
 import { useAgentObjectIds } from '@/hooks/useAgentObjectIds'
 import { FundAgentModal } from '@/components/FundAgentModal'
-
-const MIST_PER_SUI = 1_000_000_000
-const GAS_BUDGET = 10_000_000
 
 interface FormData {
   agentName: string
@@ -137,29 +134,6 @@ export default function DefendPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const sendFunds = async () => {
-    if (!account?.address) throw new Error('Wallet not connected')
-
-    const coins = await client.getCoins({
-      owner: account.address,
-      coinType: '0x2::sui::SUI',
-    })
-
-    if (!coins.data.length) {
-      throw new Error('No SUI coins found in wallet')
-    }
-
-    const amountInMist = BigInt(parseFloat('1') * MIST_PER_SUI)
-    const tx = new Transaction()
-
-    const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountInMist)])
-    tx.transferObjects([coin], tx.pure.address(TREASURY_ADDRESS))
-    tx.setGasBudget(GAS_BUDGET)
-
-    return await signAndExecuteTransaction({ transaction: tx })
-  }
-
   const createAgentTransaction = async (agentDetails: any) => {
     const tx = new Transaction()
     const sigVector = hexToVector(agentDetails.signature)
@@ -228,7 +202,8 @@ export default function DefendPage() {
       // await sendFunds()
 
       toast.info('Registering agent...')
-      const agentDetails = await registerAgentUtil(formData.systemPrompt, formData.feePerMessage)
+      const feePerMessage = parseFloat(formData.feePerMessage) * MIST_PER_SUI
+      const agentDetails = await registerAgentUtil(formData.systemPrompt, feePerMessage)
 
       toast.info('Creating blockchain transaction...')
       await createAgentTransaction(agentDetails)
