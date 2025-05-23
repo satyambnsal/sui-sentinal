@@ -1,3 +1,4 @@
+import { MIST_PER_SUI } from '@/constants'
 import { formatBalance } from '@/lib/utils'
 import clsx from 'clsx'
 
@@ -21,8 +22,9 @@ export const AgentInfo = ({
   drainAmount,
   className,
 }: AgentInfoProps) => {
-  const prizePool = formatBalance(BigInt(balance), decimal)
-  const messagePrice = promptPrice
+  const prizePool = (Number(balance) / MIST_PER_SUI).toFixed(4)
+  const messagePrice = (Number(promptPrice) / MIST_PER_SUI).toFixed(4)
+
   const drainAmountFormatted = formatBalance(BigInt(drainAmount), decimal)
 
   return (

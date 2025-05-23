@@ -2,7 +2,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { LeaderboardSkeleton } from './ui/skeletons/LeaderboardSkeleton'
 import { AgentDetails } from '@/types'
-import { formatBalance } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { useFundAgentModal } from '@/hooks/useFundAgentModal'
 import { useCurrentAccount } from '@mysten/dapp-kit'

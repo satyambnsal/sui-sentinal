@@ -118,7 +118,10 @@ export default function AgentChallengePage() {
   if (error || !agent) {
     return (
       <div className="container mx-auto px-4 py-8 pt-24">
-        <Link href="/attack" className="text-blue-400 hover:underline mb-8 block">
+        <Link
+          href="/attack"
+          className="text-blue-400 hover:underline mb-8 block"
+        >
           ← Back to Agents
         </Link>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -130,7 +133,10 @@ export default function AgentChallengePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl">
-      <Link href="/attack" className="flex items-center gap-1 text-blue-400 hover:underline mb-8">
+      <Link
+        href="/attack"
+        className="flex items-center gap-1 text-blue-400 hover:underline mb-8"
+      >
         <ChevronLeft className="w-5 h-5" />
         Back to Agents
       </Link>
@@ -138,13 +144,13 @@ export default function AgentChallengePage() {
       <div className="bg-gray-900 rounded-lg p-6 mb-8">
         <h1 className="text-3xl font-bold mb-4">Agent: {agent.agent_id}</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 mb-6">
           <AgentInfo
             balance={agent.balance.toString()}
             decimal={9} // Assuming SUI decimals
             promptPrice={agent.cost_per_message.toString()}
             symbol="SUI"
-            className="w-full"
+            className="w-full !ml-0"
             breakAttempts={0}
             isDrained={false}
             drainAmount="0"
@@ -167,9 +173,15 @@ export default function AgentChallengePage() {
         >
           <h2 className="text-2xl font-bold mb-4">Attack This Agent</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <div>
-              <label htmlFor="prompt" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="prompt"
+                className="block text-sm font-medium mb-2"
+              >
                 Enter your prompt (max 300 characters)
               </label>
               <textarea
