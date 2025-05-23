@@ -116,20 +116,18 @@ public struct AgentDefeated has copy, drop {
 
 
 fun init(otw: SENTINEL, ctx: &mut TxContext) {
-    // Initialize enclave configuration
     let cap = enclave::new_cap(otw, ctx);
 
     cap.create_enclave_config(
         b"sentinel enclave".to_string(),
-        x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", // pcr0
-        x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", // pcr1
-        x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", // pcr2
+        x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         ctx,
     );
 
     transfer::public_transfer(cap, ctx.sender());
     
-    // Create and share the agent registry
     let registry = AgentRegistry {
         id: object::new(ctx),
         agents: table::new(ctx),
@@ -138,7 +136,7 @@ fun init(otw: SENTINEL, ctx: &mut TxContext) {
     transfer::share_object(registry);
 }
 
-/// Register a new agent with its prompt, cost per message, and initial funds
+
 #[allow(lint(self_transfer))]
 public fun register_agent<T>(
     registry: &mut AgentRegistry,
@@ -204,13 +202,13 @@ public fun consume_prompt<T>(
     enclave: &Enclave<T>,
     ctx: &mut TxContext,
 ) {
-    // Verify the agent exists in registry and matches the provided agent object
+
     assert!(table::contains(&registry.agents, agent_id), EAgentNotFound);
     let registered_agent_id = *table::borrow(&registry.agents, agent_id);
     assert!(object::id(agent) == registered_agent_id, EAgentNotFound);
     assert!(agent.agent_id == agent_id, EAgentNotFound);
     
-    // Verify signature
+
     let response = ConsumePromptResponse {
         agent_id,
         success,
@@ -229,20 +227,19 @@ public fun consume_prompt<T>(
     
     let caller = ctx.sender();
     
-    // Emit event for prompt consumption
+
     event::emit(PromptConsumed {
         agent_id,
         success,
-        amount: 0, // Will be updated if agent is defeated
+        amount: 0,
         sender: caller,
     });
     
-    // Check if agent is defeated (score > 70 OR success)
+
     if (score > 70 || success) {
         let agent_balance = balance::value(&agent.balance);
         
         if (agent_balance > 0) {
-            // Transfer all funds from agent to caller
             let withdrawn_balance = balance::withdraw_all(&mut agent.balance);
             let reward_coin = coin::from_balance(withdrawn_balance, ctx);
             
@@ -274,7 +271,7 @@ public fun get_all_agent_ids(registry: &AgentRegistry): vector<String> {
     registry.agent_list
 }
 
-/// Get the total number of agents in the registry
+
 public fun get_agent_count(registry: &AgentRegistry): u64 {
     vector::length(&registry.agent_list)
 }
@@ -368,7 +365,7 @@ fun test_register_agent_flow() {
 
     let sig =
         x"b5b70ffde62eb6facf2ab01f03fa0124e9bf646b094e8699c64b964b8dccad42f4a9dc3beccee25b5e7ab5ed3f53cef5d30300af06539f7ed51c842dd3c35603";
-    let agent = register_agent(
+    register_agent(
         &mut registry,
         b"135f5b67-a17c-4bb0-bbfd-f02510971d48".to_string(),
         1747898372482,
@@ -384,12 +381,10 @@ fun test_register_agent_flow() {
     assert!(vector::length(&agent_ids) == 1, 0);
     assert!(agent_exists(&registry, b"135f5b67-a17c-4bb0-bbfd-f02510971d48".to_string()), 1);
     
-    let (agent_id, creator, cost, prompt) = get_agent_details(&agent);
+    let (agent_id, creator, cost, prompt, balance) = get_agent_details(&agent);
     assert!(cost == 1000, 2);
     assert!(prompt == b"You are a helpful AI assistant".to_string(), 3);
 
-    // Transfer the agent to the caller
-    transfer::public_transfer(agent, scenario.ctx().sender());
 
     test_scenario::return_shared(config);
     test_scenario::return_shared(registry);

@@ -117,7 +117,7 @@ Now evaluate this user message:"#,
     agent_prompt
 );
 
-    // If there's an error in the API call or parsing, return a default response with success=false, score=0
+
     let api_result = client
         .post("https://api.anthropic.com/v1/messages")
         .header("anthropic-version", "2023-06-01")

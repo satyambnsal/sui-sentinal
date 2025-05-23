@@ -21,10 +21,7 @@ use std::time::Duration;
 use tracing::info;
 
 use fastcrypto::ed25519::Ed25519KeyPair;
-/// ==== COMMON TYPES ====
 
-/// Intent message wrapper struct containing the intent scope and timestamp.
-/// This standardizes the serialized payload for signing.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct IntentMessage<T: Serialize> {
     pub intent: IntentScope,
@@ -32,8 +29,7 @@ pub struct IntentMessage<T: Serialize> {
     pub data: T,
 }
 
-/// Intent scope enum. Add new scope here if needed, each corresponds to a
-/// scope for signing. Replace in with your own intent per message type being signed by the enclave.
+
 #[derive(Serialize_repr, Deserialize_repr, Debug)]
 #[repr(u8)]
 pub enum IntentScope {
@@ -59,13 +55,13 @@ pub struct ProcessedDataResponse<T> {
     pub signature: String,
 }
 
-/// Wrapper struct containing the request payload.
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProcessDataRequest<T> {
     pub payload: T,
 }
 
-/// Sign the bcs bytes of the the payload with keypair.
+
 pub fn to_signed_response<T: Serialize + Clone>(
     kp: &Ed25519KeyPair,
     payload: T,
@@ -86,17 +82,14 @@ pub fn to_signed_response<T: Serialize + Clone>(
     }
 }
 
-/// ==== HEALTHCHECK, GET ATTESTASTION ENDPOINT IMPL ====
 
-/// Response for get attestation.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetAttestationResponse {
-    /// Attestation document serialized in Hex.
+
     pub attestation: String,
 }
 
-/// Endpoint that returns an attestation committed
-/// to the enclave's public key.
+
 pub async fn get_attestation(
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<GetAttestationResponse>, EnclaveError> {
@@ -105,7 +98,7 @@ pub async fn get_attestation(
     let pk = state.eph_kp.public();
     let fd = driver::nsm_init();
 
-    // Send attestation request to NSM driver with public key set.
+
     let request = NsmRequest::Attestation {
         user_data: None,
         nonce: None,
