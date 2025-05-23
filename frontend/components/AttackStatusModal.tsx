@@ -12,6 +12,8 @@ export const AttackStatusModal = ({
   showResultModal,
   setShowResultModal,
 }: AttackStatusModalProps) => {
+  const score = apiResponse?.response.data.score || 0
+
   return (
     <Dialog
       open={showResultModal && !!apiResponse}
@@ -39,10 +41,10 @@ export const AttackStatusModal = ({
             <div className="w-full bg-gray-800 rounded-full h-4">
               <div
                 className="bg-blue-500 h-4 rounded-full"
-                style={{ width: `${(apiResponse?.response.data.score || 0) * 10}%` }}
+                style={{ width: `${score}%` }}
               />
             </div>
-            <span className="font-medium">{apiResponse?.response.data.score}/10</span>
+            <span className="font-medium">{score}/100</span>
           </div>
         </div>
 
