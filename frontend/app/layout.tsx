@@ -6,6 +6,7 @@ import NextTopLoader from 'nextjs-toploader'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Analytics } from '@vercel/analytics/react'
+import Footer from '@/components/Footer'
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: '--font-ibm-plex-mono',
@@ -32,8 +33,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${ibmPlexMono.variable} ${dmSans.variable} font-sans antialiased`}>
         <Providers>
-          <NextTopLoader color="#FFFFFF" showSpinner={false} />
+          <NextTopLoader
+            color="#FFFFFF"
+            showSpinner={false}
+          />
           {children}
+          <Footer />
           <ToastContainer />
         </Providers>
         <Analytics />
