@@ -11,6 +11,7 @@ import { toast } from 'react-toastify'
 import { hexToVector } from '@/lib/utils'
 import { registerAgentUtil } from './utils'
 import { useAgentObjectIds } from '@/hooks/useAgentObjectIds'
+import { FundAgentModal } from '@/components/FundAgentModal'
 
 const MIST_PER_SUI = 1_000_000_000
 const GAS_BUDGET = 10_000_000
@@ -92,6 +93,9 @@ export default function DefendPage() {
   const [errors, setErrors] = useState<Partial<FormData>>({})
   const [isLoading, setIsLoading] = useState(false)
 
+  const [deployedAgentObjectId, setDeployedAgentObjectId] = useState<string | null>(null)
+  const [showFundModal, setShowFundModal] = useState(false)
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -100,6 +104,15 @@ export default function DefendPage() {
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: '' }))
     }
+  }
+
+  const handleCloseFundModal = () => {
+    setShowFundModal(false)
+    setDeployedAgentObjectId(null)
+  }
+
+  const handleFundSuccess = () => {
+    toast.success('Agent funded successfully!')
   }
 
   const validateForm = (): boolean => {
@@ -187,6 +200,9 @@ export default function DefendPage() {
             console.log('agent obhect', agentObject)
             const agentObjectId = (agentObject as any).objectId
             await addAgentObjectId(agentObjectId)
+            setDeployedAgentObjectId(agentObjectId)
+            setShowFundModal(true)
+            toast.success('Agent deployed! Now fund your agent.')
             console.log('Object id added to db successfully')
           }
 
@@ -297,6 +313,15 @@ export default function DefendPage() {
           )}
         </button>
       </form>
+
+      {deployedAgentObjectId && (
+        <FundAgentModal
+          open={showFundModal}
+          onClose={handleCloseFundModal}
+          agentObjectId={deployedAgentObjectId}
+          onSuccess={handleFundSuccess}
+        />
+      )}
     </div>
   )
 }
