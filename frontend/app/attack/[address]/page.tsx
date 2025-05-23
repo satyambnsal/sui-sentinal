@@ -8,22 +8,28 @@ import { useCurrentAccount } from '@mysten/dapp-kit'
 import { motion } from 'framer-motion'
 import { useAllAgents } from '@/hooks/useAllAgents'
 import { useConsumePrompt } from '@/hooks/useConsumePrompt'
-import { AgentDetails } from '@/types'
+import { AgentDetails, ConsumePromptApiResponse } from '@/types'
 import { AgentInfo } from '@/components/AgentInfo'
 import { AgentStatus } from '@/types'
 import { getAgentStatus } from '@/lib/utils'
 import { AgentEvents, useAgentEvents } from '@/hooks/useAgentEvents'
+import { AttackStatusModal } from '@/components/AttackStatusModal'
 
 export default function AgentChallengePage() {
   const params = useParams()
   const agentObjectId = params.address as string
-  console.log('agent object id', agentObjectId)
   const account = useCurrentAccount()
   const { events: allEvents, refetch } = useAgentEvents()
   console.log('EVENTS', allEvents)
 
   const { refetchAgent } = useAllAgents()
-  const { consumePrompt } = useConsumePrompt()
+  const { consumePrompt } = useConsumePrompt({
+    showToasts: true,
+    onApiSuccess: (response) => {
+      setApiResponse(response)
+      setShowResultModal(true)
+    },
+  })
 
   const [agent, setAgent] = useState<AgentDetails | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,6 +42,8 @@ export default function AgentChallengePage() {
     agentDefeated: [],
     promptConsumed: [],
   })
+  const [apiResponse, setApiResponse] = useState<ConsumePromptApiResponse | null>(null)
+  const [showResultModal, setShowResultModal] = useState(false)
 
   // Fetch agent details when component mounts or objectId changes
   useEffect(() => {
@@ -91,6 +99,7 @@ export default function AgentChallengePage() {
     try {
       setIsSubmitting(true)
       setSubmitError(null)
+      setApiResponse(null)
 
       await consumePrompt({
         agentDetails: agent,
@@ -156,7 +165,7 @@ export default function AgentChallengePage() {
         <div className="grid grid-cols-1 mb-6">
           <AgentInfo
             balance={agent.balance.toString()}
-            decimal={9} // Assuming SUI decimals
+            decimal={9}
             promptPrice={agent.cost_per_message.toString()}
             symbol="SUI"
             className="w-full !ml-0"
@@ -173,6 +182,12 @@ export default function AgentChallengePage() {
           </div>
         </div>
       </div>
+
+      <AttackStatusModal
+        apiResponse={apiResponse}
+        showResultModal={showResultModal}
+        setShowResultModal={setShowResultModal}
+      />
 
       {agentStatus === AgentStatus.ACTIVE && (
         <motion.div
