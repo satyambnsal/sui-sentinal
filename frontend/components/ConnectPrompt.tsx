@@ -12,13 +12,13 @@ export const ConnectPrompt = ({ title, subtitle, theme }: ConnectPromptProps) =>
   const themeColors = {
     attacker: {
       hover:
-        '[&:hover]:text-white [&:hover]:border-[#FF3F26] [&:hover]:shadow-[0_0_30px_rgba(255,63,38,0.3)] hover:after:bg-[#FF3F26]',
+        '[&:hover]:border-[#FF3F26] [&:hover]:shadow-[0_0_30px_rgba(255,63,38,0.3)] hover:after:bg-[#FF3F26]',
       gradient: 'bg-gradient-to-t from-[#FF3F26]/10 via-transparent to-transparent',
       sweep: 'before:via-[#FF3F26]/30',
     },
     defender: {
       hover:
-        '[&:hover]:text-white [&:hover]:border-[#00A3FF] [&:hover]:shadow-[0_0_30px_rgba(0,163,255,0.3)] hover:after:bg-[#00A3FF]',
+        '[&:hover]:border-[#00A3FF] [&:hover]:shadow-[0_0_30px_rgba(0,163,255,0.3)] hover:after:bg-[#00A3FF]',
       gradient: 'bg-gradient-to-t from-[#00A3FF]/10 via-transparent to-transparent',
       sweep: 'before:via-[#00A3FF]/30',
     },

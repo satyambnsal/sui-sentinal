@@ -22,7 +22,7 @@ export const AgentInfo = ({
   className,
 }: AgentInfoProps) => {
   const prizePool = formatBalance(BigInt(balance), decimal)
-  const messagePrice = formatBalance(BigInt(promptPrice), decimal, 2, true)
+  const messagePrice = promptPrice
   const drainAmountFormatted = formatBalance(BigInt(drainAmount), decimal)
 
   return (

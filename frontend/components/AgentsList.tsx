@@ -63,7 +63,7 @@ export const AgentsList = ({
             <AnimatePresence>
               {agents.map((agent, idx) => {
                 const balance = formatBalance(BigInt(agent.balance), 9)
-                const costPerMessage = formatBalance(BigInt(agent.cost_per_message), 9, 2, true)
+                const costPerMessage = agent.cost_per_message
 
                 return (
                   <motion.div
