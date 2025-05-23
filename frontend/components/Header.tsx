@@ -5,10 +5,10 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 import { MenuItems } from './MenuItems'
-import { MenuIcon, Plus } from 'lucide-react'
+import { MenuIcon, Plus, YoutubeIcon } from 'lucide-react'
 import Link from 'next/link'
 import { ConnectButton } from './ConnectButton'
-import { PROJECT_GITHUB_URL, SUI_FAUCET_URL } from '@/constants'
+import { PROJECT_GITHUB_URL, YOUTUBE_VIDEO_URL } from '@/constants'
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -55,16 +55,8 @@ export const Header = () => {
             <MenuItems menuOpen={menuOpen} />
           </div>
         </div>
-        <a
-          href={SUI_FAUCET_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mb-12 lg:mb-0 block text-center mx-auto text-sm font-medium text-[#FFFFFF] hover:text-[#CCCCCC] transition-colors underline"
-        >
-          Need SUI ?
-        </a>
 
-        <div className="hidden xl:block">
+        <div className="hidden xl:block ms-auto">
           <ConnectButton />
         </div>
         <button
@@ -86,6 +78,13 @@ export const Header = () => {
             height={32}
             alt="shield"
           />
+        </Link>
+        <Link
+          className="block ml-1 xl:ml-4 flex-shrink-0"
+          href={YOUTUBE_VIDEO_URL}
+          target="_blank"
+        >
+          <YoutubeIcon size={32} />
         </Link>
       </div>
       {menuOpen && (

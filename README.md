@@ -6,6 +6,8 @@
 
 **🚀 Live Demo**: [https://sui-sentinal-plum.vercel.app/](https://sui-sentinal-plum.vercel.app/)
 
+**🎥 Demo Video**: [https://www.youtube.com/watch?v=U3qMdgSGASI](https://www.youtube.com/watch?v=U3qMdgSGASI)
+
 ---
 
 ## 🎯 What is Sui Sentinel?
@@ -243,6 +245,8 @@ sui-sentinel/
 **Telegram**: [@satyambnsal](http://t.me/satyambnsal)
 
 **Live Demo**: [https://sui-sentinal-plum.vercel.app/](https://sui-sentinal-plum.vercel.app/)
+
+**Demo Video**: [https://www.youtube.com/watch?v=U3qMdgSGASI](https://www.youtube.com/watch?v=U3qMdgSGASI)
 
 **TEE Server**: [http://54.81.11.64:3000](http://54.81.11.64:3000)
 
