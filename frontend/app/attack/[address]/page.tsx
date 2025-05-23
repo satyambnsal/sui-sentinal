@@ -12,12 +12,15 @@ import { AgentDetails } from '@/types'
 import { AgentInfo } from '@/components/AgentInfo'
 import { AgentStatus } from '@/types'
 import { getAgentStatus } from '@/lib/utils'
+import { AgentEvents, useAgentEvents } from '@/hooks/useAgentEvents'
 
 export default function AgentChallengePage() {
   const params = useParams()
   const agentObjectId = params.address as string
   console.log('agent object id', agentObjectId)
   const account = useCurrentAccount()
+  const { events: allEvents, refetch } = useAgentEvents()
+  console.log('EVENTS', allEvents)
 
   const { refetchAgent } = useAllAgents()
   const { consumePrompt } = useConsumePrompt()
@@ -29,6 +32,10 @@ export default function AgentChallengePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>(AgentStatus.ACTIVE)
+  const [agentEvents, setAgentEvents] = useState<AgentEvents>({
+    agentDefeated: [],
+    promptConsumed: [],
+  })
 
   // Fetch agent details when component mounts or objectId changes
   useEffect(() => {
@@ -38,6 +45,13 @@ export default function AgentChallengePage() {
         const agentDetails = await refetchAgent(agentObjectId)
         setAgent(agentDetails)
         setAgentStatus(getAgentStatus({ isDrained: false, isFinalized: false }))
+        const agentDefeated = allEvents.agentDefeated.filter(
+          (event) => event.parsedJson.agent_id === agentDetails.agent_id
+        )
+        const promptConsumed = allEvents.promptConsumed.filter(
+          (event) => event.parsedJson.agent_id === agentDetails.agent_id
+        )
+        setAgentEvents({ agentDefeated, promptConsumed })
       } catch (err) {
         setError('Failed to load agent details')
         console.error(err)
@@ -118,10 +132,7 @@ export default function AgentChallengePage() {
   if (error || !agent) {
     return (
       <div className="container mx-auto px-4 py-8 pt-24">
-        <Link
-          href="/attack"
-          className="text-blue-400 hover:underline mb-8 block"
-        >
+        <Link href="/attack" className="text-blue-400 hover:underline mb-8 block">
           ← Back to Agents
         </Link>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -130,13 +141,11 @@ export default function AgentChallengePage() {
       </div>
     )
   }
+  console.log('Agent events', agentEvents)
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl">
-      <Link
-        href="/attack"
-        className="flex items-center gap-1 text-blue-400 hover:underline mb-8"
-      >
+      <Link href="/attack" className="flex items-center gap-1 text-blue-400 hover:underline mb-8">
         <ChevronLeft className="w-5 h-5" />
         Back to Agents
       </Link>
@@ -173,15 +182,9 @@ export default function AgentChallengePage() {
         >
           <h2 className="text-2xl font-bold mb-4">Attack This Agent</h2>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="prompt"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="prompt" className="block text-sm font-medium mb-2">
                 Enter your prompt (max 600 characters)
               </label>
               <textarea
