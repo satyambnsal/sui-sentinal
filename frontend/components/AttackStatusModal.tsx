@@ -12,7 +12,9 @@ export const AttackStatusModal = ({
   showResultModal,
   setShowResultModal,
 }: AttackStatusModalProps) => {
-  const score = apiResponse?.response.data.score || 0
+  const success = apiResponse?.response.data.success
+  const originalScore = apiResponse?.response.data.score || 0
+  const score = success ? 100 : originalScore
 
   return (
     <Dialog
@@ -21,7 +23,7 @@ export const AttackStatusModal = ({
     >
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">
-          {apiResponse?.response.data.success ? (
+          {success ? (
             <span className="text-green-400">Attack Successful! 🎉</span>
           ) : (
             <span className="text-yellow-400">Attack Failed</span>
