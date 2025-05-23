@@ -14,12 +14,13 @@ import { AgentStatus } from '@/types'
 import { getAgentStatus } from '@/lib/utils'
 import { AgentEvents, useAgentEvents } from '@/hooks/useAgentEvents'
 import { AttackStatusModal } from '@/components/AttackStatusModal'
+import AgentHistory from '@/components/AgentHistory'
 
 export default function AgentChallengePage() {
   const params = useParams()
   const agentObjectId = params.address as string
   const account = useCurrentAccount()
-  const { events: allEvents, refetch } = useAgentEvents()
+  const { events: allEvents } = useAgentEvents()
   console.log('EVENTS', allEvents)
 
   const { refetchAgent } = useAllAgents()
@@ -71,7 +72,7 @@ export default function AgentChallengePage() {
     if (agentObjectId) {
       fetchAgent()
     }
-  }, [agentObjectId, refetchAgent])
+  }, [agentObjectId, refetchAgent, allEvents])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,7 +142,10 @@ export default function AgentChallengePage() {
   if (error || !agent) {
     return (
       <div className="container mx-auto px-4 py-8 pt-24">
-        <Link href="/attack" className="text-blue-400 hover:underline mb-8 block">
+        <Link
+          href="/attack"
+          className="text-blue-400 hover:underline mb-8 block"
+        >
           ← Back to Agents
         </Link>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -154,7 +158,10 @@ export default function AgentChallengePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl">
-      <Link href="/attack" className="flex items-center gap-1 text-blue-400 hover:underline mb-8">
+      <Link
+        href="/attack"
+        className="flex items-center gap-1 text-blue-400 hover:underline mb-8"
+      >
         <ChevronLeft className="w-5 h-5" />
         Back to Agents
       </Link>
@@ -162,13 +169,13 @@ export default function AgentChallengePage() {
       <div className="bg-gray-900 rounded-lg p-6 mb-8">
         <h1 className="text-3xl font-bold mb-4">Agent: {agent.agent_id}</h1>
 
-        <div className="grid grid-cols-1 mb-6">
+        <div className="grid grid-cols-1 mb-6 ">
           <AgentInfo
             balance={agent.balance.toString()}
             decimal={9}
             promptPrice={agent.cost_per_message.toString()}
             symbol="SUI"
-            className="w-full !ml-0"
+            className="w-full"
             breakAttempts={0}
             isDrained={false}
             drainAmount="0"
@@ -197,9 +204,15 @@ export default function AgentChallengePage() {
         >
           <h2 className="text-2xl font-bold mb-4">Attack This Agent</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <div>
-              <label htmlFor="prompt" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="prompt"
+                className="block text-sm font-medium mb-2"
+              >
                 Enter your prompt (max 600 characters)
               </label>
               <textarea
@@ -248,6 +261,11 @@ export default function AgentChallengePage() {
           </p>
         </div>
       )}
+
+      <AgentHistory
+        agentEvents={agentEvents}
+        currentAgentId={agent.agent_id}
+      />
     </div>
   )
 }
