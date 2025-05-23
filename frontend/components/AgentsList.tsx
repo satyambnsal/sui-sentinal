@@ -6,6 +6,7 @@ import { formatBalance } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { useFundAgentModal } from '@/hooks/useFundAgentModal'
 import { useCurrentAccount } from '@mysten/dapp-kit'
+import { MIST_PER_SUI } from '@/constants'
 
 export enum TabType {
   AgentRanking = 'AGENT_RANKING',
@@ -62,8 +63,8 @@ export const AgentsList = ({
             {/* Agent Rows */}
             <AnimatePresence>
               {agents.map((agent, idx) => {
-                const balance = formatBalance(BigInt(agent.balance), 9)
-                const costPerMessage = agent.cost_per_message
+                const balance = (Number(agent.balance) / MIST_PER_SUI).toFixed(4)
+                const costPerMessage = (Number(agent.cost_per_message) / MIST_PER_SUI).toFixed(4)
 
                 return (
                   <motion.div
