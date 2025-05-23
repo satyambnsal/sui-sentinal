@@ -6,7 +6,6 @@ import { SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
 import { AgentDetails, ConsumePromptApiResponse } from '@/types'
 import { hexToVector } from '@/lib/utils'
-import { fetchAgentDetailsViaObject } from '@/lib/sui-utils'
 
 const MIST_PER_SUI = 1_000_000_000
 const GAS_BUDGET = 50_000_000
@@ -22,7 +21,7 @@ interface UseConsumePromptOptions {
 }
 
 interface ConsumePromptParams {
-  agentObjectId: string
+  agentDetails: AgentDetails
   message: string
 }
 
@@ -34,7 +33,6 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
   const [currentStep, setCurrentStep] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [lastResult, setLastResult] = useState<any>(null)
-  const [agentDetails, setAgentDetails] = useState<AgentDetails | null>(null)
 
   const account = useCurrentAccount()
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction({
@@ -179,7 +177,7 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
 
   // Main function that orchestrates all steps
   const consumePrompt = useCallback(
-    async ({ agentObjectId, message }: ConsumePromptParams) => {
+    async ({ agentDetails, message }: ConsumePromptParams) => {
       if (!account?.address) {
         const errorMsg = 'Wallet not connected'
         setError(errorMsg)
@@ -187,7 +185,7 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
         return
       }
 
-      if (!agentObjectId || !message?.trim()) {
+      if (!agentDetails?.agent_object_id || !message?.trim()) {
         const errorMsg = 'Invalid agent ID or message'
         setError(errorMsg)
         if (showToasts) toast.error(errorMsg)
@@ -199,27 +197,25 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
       setCurrentStep('Fetching agent details...')
 
       try {
-        // Step 1: Fetch agent details
-        if (showToasts) toast.info('Fetching agent details...')
-        const details = await fetchAgentDetailsViaObject(client, agentObjectId)
-        setAgentDetails(details)
-        console.log('Agent details:', details)
-
         // Step 2: Transfer payment to creator
         setCurrentStep('Processing payment...')
         if (showToasts) toast.info('Processing payment...')
-        await transferPayment(details)
+        await transferPayment(agentDetails)
 
         // Step 3: Call consume prompt API
         setCurrentStep('Processing prompt...')
         if (showToasts) toast.info('Processing prompt...')
-        const apiResponse = await callConsumePromptApi(details.agent_id, message)
+        const apiResponse = await callConsumePromptApi(agentDetails.agent_id, message)
         console.log('API response:', apiResponse)
 
         // Step 4: Execute consume prompt transaction
         setCurrentStep('Finalizing transaction...')
         if (showToasts) toast.info('Finalizing transaction...')
-        const result = await executeConsumePrompt(agentObjectId, details, apiResponse)
+        const result = await executeConsumePrompt(
+          agentDetails.agent_object_id,
+          agentDetails,
+          apiResponse
+        )
 
         // Success
         const success = apiResponse.response.data.success
@@ -265,7 +261,6 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
     setError(null)
     setLastResult(null)
     setCurrentStep('')
-    setAgentDetails(null)
   }, [])
 
   return {
@@ -274,7 +269,6 @@ export const useConsumePrompt = (options: UseConsumePromptOptions = {}) => {
     currentStep,
     error,
     lastResult,
-    agentDetails,
     reset,
     isConnected: !!account?.address,
   }

@@ -72,7 +72,6 @@ const FormInput: React.FC<FormInputProps> = ({
 
 export default function DefendPage() {
   const client = useSuiClient()
-  const router = useRouter()
   const account = useCurrentAccount()
   const { fundAgent } = useFundAgent()
   const { consumePrompt } = useConsumePrompt()
