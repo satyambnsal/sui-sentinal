@@ -34,3 +34,5 @@ export const SUI_CONFIG = {
   ENCLAVE_OBJECT_ID: '0x5bc7b3dbe25f61535578e05b9c1979c197cf1962afff8d129de16483b1fd05d1',
   AGENT_OBJECT_IDS: ['0xd6784e19fa6dd18f4a6f3c7c14e405f2208d223a18cc852bfbef6c7b3bf88ff5'],
 }
+
+export const EXPLORER_BASE_URL = 'https://testnet.suivision.xyz'

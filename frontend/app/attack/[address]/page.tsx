@@ -10,7 +10,6 @@ import { useAllAgents } from '@/hooks/useAllAgents'
 import { useConsumePrompt } from '@/hooks/useConsumePrompt'
 import { AgentDetails } from '@/types'
 import { AgentInfo } from '@/components/AgentInfo'
-import { StatusDisplay } from '@/components/StatusDisplay'
 import { AgentStatus } from '@/types'
 import { getAgentStatus } from '@/lib/utils'
 
@@ -150,8 +149,6 @@ export default function AgentChallengePage() {
             isDrained={false}
             drainAmount="0"
           />
-
-          <StatusDisplay agent={agent} status={agentStatus} />
         </div>
 
         <div className="bg-gray-800 rounded-lg p-4 mb-6">

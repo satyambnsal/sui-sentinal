@@ -1,7 +1,7 @@
-import { ACTIVE_NETWORK } from '@/constants'
-import { truncateAddress } from '@/lib/utils'
+// import { ACTIVE_NETWORK } from '@/constants'
+// import { truncateAddress } from '@/lib/utils'
 import { Prompt } from '@/types'
-import Link from 'next/link'
+// import Link from 'next/link'
 
 export const ChallengeDisplay = ({ challenge }: { challenge: Prompt }) => {
   const isWinner = challenge.is_success
@@ -13,7 +13,7 @@ export const ChallengeDisplay = ({ challenge }: { challenge: Prompt }) => {
       }`}
     >
       <div className="flex items-center gap-2 mb-4">
-        <Link
+        {/* <Link
           className={`underline block font-mono text-sm ${
             isWinner ? 'text-[#FFD700]' : 'text-gray-400'
           }`}
@@ -21,7 +21,7 @@ export const ChallengeDisplay = ({ challenge }: { challenge: Prompt }) => {
           target="_blank"
         >
           {truncateAddress(challenge.drained_to)}
-        </Link>
+        </Link> */}
       </div>
       <div className="space-y-4">
         <div className="bg-black/30 p-4 rounded-lg overflow-scroll">
