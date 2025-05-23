@@ -12,6 +12,7 @@ import { hexToVector } from '@/lib/utils'
 import { registerAgentUtil } from './utils'
 import { useAgentObjectIds } from '@/hooks/useAgentObjectIds'
 import { FundAgentModal } from '@/components/FundAgentModal'
+import { SuccessModal } from '@/components/DefenderSuccessModal'
 
 interface FormData {
   agentName: string
@@ -91,7 +92,9 @@ export default function DefendPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const [deployedAgentObjectId, setDeployedAgentObjectId] = useState<string | null>(null)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFundModal, setShowFundModal] = useState(false)
+  const [transactionDigest, setTransactionDigest] = useState<string>('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -103,13 +106,38 @@ export default function DefendPage() {
     }
   }
 
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false)
+    setDeployedAgentObjectId(null)
+    setTransactionDigest('')
+    // Reset form
+    setFormData({
+      agentName: '',
+      systemPrompt: '',
+      feePerMessage: '',
+    })
+  }
+
+  const handleAddFunds = () => {
+    setShowSuccessModal(false)
+    setShowFundModal(true)
+  }
+
   const handleCloseFundModal = () => {
     setShowFundModal(false)
     setDeployedAgentObjectId(null)
+    setTransactionDigest('')
+    // Reset form
+    setFormData({
+      agentName: '',
+      systemPrompt: '',
+      feePerMessage: '',
+    })
   }
 
   const handleFundSuccess = () => {
     toast.success('Agent funded successfully!')
+    handleCloseFundModal()
   }
 
   const validateForm = (): boolean => {
@@ -154,29 +182,26 @@ export default function DefendPage() {
       ],
     })
 
-    // tx.transferObjects([agent], tx.pure.address(keypair.toSuiAddress()))
-
     return await signAndExecuteTransaction(
       { transaction: tx },
       {
         onSuccess: async (result) => {
           console.log('RESULT', result)
           console.log('object changes', result.objectChanges)
-          // setDigest(result.digest)
-          toast.success(`Agent deployed successfully! ${result.digest.toString()}`)
 
           const agentObject = result?.objectChanges?.find(
             (obj: any) =>
               obj.objectType ===
               `${SUI_CONFIG.EXAMPLES_PACKAGE_ID}::${SUI_CONFIG.MODULE_NAME}::Agent`
           )
+
           if (agentObject) {
-            console.log('agent obhect', agentObject)
+            console.log('agent object', agentObject)
             const agentObjectId = (agentObject as any).objectId
             await addAgentObjectId(agentObjectId)
             setDeployedAgentObjectId(agentObjectId)
-            setShowFundModal(true)
-            toast.success('Agent deployed! Now fund your agent.')
+            setTransactionDigest(result.digest.toString())
+            setShowSuccessModal(true)
             console.log('Object id added to db successfully')
           }
 
@@ -199,7 +224,6 @@ export default function DefendPage() {
 
     try {
       toast.info('Processing payment...')
-      // await sendFunds()
 
       toast.info('Registering agent...')
       const feePerMessage = parseFloat(formData.feePerMessage) * MIST_PER_SUI
@@ -273,6 +297,7 @@ export default function DefendPage() {
           placeholder="0.00"
           required
         />
+
         <button
           type="submit"
           disabled={isLoading}
@@ -289,6 +314,16 @@ export default function DefendPage() {
         </button>
       </form>
 
+      {/* Success Modal */}
+      <SuccessModal
+        open={showSuccessModal}
+        onClose={handleCloseSuccessModal}
+        onAddFunds={handleAddFunds}
+        agentName={formData.agentName}
+        transactionDigest={transactionDigest}
+      />
+
+      {/* Fund Modal */}
       {deployedAgentObjectId && (
         <FundAgentModal
           open={showFundModal}

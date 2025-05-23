@@ -215,13 +215,6 @@ export default function AgentChallengePage() {
               )}
             </button>
           </form>
-
-          <div className="mt-6 text-sm text-gray-400">
-            <p>Cost per message: {agent.cost_per_message} SUI</p>
-            <p className="mt-2">
-              This will send your prompt to the agent and attempt to break its defenses.
-            </p>
-          </div>
         </motion.div>
       )}
 
