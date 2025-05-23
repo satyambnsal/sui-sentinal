@@ -7,7 +7,6 @@ import { Transaction } from '@mysten/sui/transactions'
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
 import { ConnectPrompt } from '@/components/ConnectPrompt'
 import { SUI_CONFIG, TREASURY_ADDRESS } from '@/constants'
-import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
 // import { client } from '@/components/ConnectButton'
 import { hexToVector } from '@/lib/utils'
@@ -23,7 +22,6 @@ interface FormData {
   agentName: string
   systemPrompt: string
   feePerMessage: string
-  initialBalance: string
 }
 
 interface FormInputProps {
@@ -94,7 +92,6 @@ export default function DefendPage() {
     agentName: '',
     systemPrompt: '',
     feePerMessage: '',
-    initialBalance: '',
   })
 
   const [errors, setErrors] = useState<Partial<FormData>>({})
@@ -128,11 +125,6 @@ export default function DefendPage() {
       newErrors.feePerMessage = 'Fee must be a positive number'
     }
 
-    const balance = parseFloat(formData.initialBalance)
-    if (isNaN(balance) || balance < 0) {
-      newErrors.initialBalance = 'Initial balance must be a positive number'
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -149,7 +141,7 @@ export default function DefendPage() {
       throw new Error('No SUI coins found in wallet')
     }
 
-    const amountInMist = BigInt(parseFloat(formData.initialBalance) * MIST_PER_SUI)
+    const amountInMist = BigInt(parseFloat('1') * MIST_PER_SUI)
     const tx = new Transaction()
 
     const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountInMist)])
@@ -249,7 +241,10 @@ export default function DefendPage() {
 
   return (
     <div className="container mx-auto px-4 py-4 pt-24 min-h-[calc(100vh-60px)]">
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 relative">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-2xl mx-auto space-y-6 relative"
+      >
         <Link
           href="/"
           className="hidden lg:flex items-center gap-1 text-gray-400 hover:text-white transition-colors absolute top-2 -left-32"
@@ -287,16 +282,6 @@ export default function DefendPage() {
           value={formData.feePerMessage}
           onChange={handleChange}
           error={errors.feePerMessage}
-          type="number"
-          placeholder="0.00"
-          required
-        />
-        <FormInput
-          label="Initial Balance (SUI)"
-          name="initialBalance"
-          value={formData.initialBalance}
-          onChange={handleChange}
-          error={errors.initialBalance}
           type="number"
           placeholder="0.00"
           required
