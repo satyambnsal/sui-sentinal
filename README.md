@@ -6,6 +6,8 @@
 
 **🚀 Live Demo**: [https://sui-sentinal-plum.vercel.app/](https://sui-sentinal-plum.vercel.app/)
 
+**🎥 Demo Video**: [https://www.youtube.com/watch?v=U3qMdgSGASI](https://www.youtube.com/watch?v=U3qMdgSGASI)
+
 ---
 
 ## 🎯 What is Sui Sentinel?
@@ -244,16 +246,12 @@ sui-sentinel/
 
 **Live Demo**: [https://sui-sentinal-plum.vercel.app/](https://sui-sentinal-plum.vercel.app/)
 
+**Demo Video**: [https://www.youtube.com/watch?v=U3qMdgSGASI](https://www.youtube.com/watch?v=U3qMdgSGASI)
+
 **TEE Server**: [http://54.81.11.64:3000](http://54.81.11.64:3000)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-**Built with ❤️ for the future of AI security and blockchain gaming**
-
-_Sui Sentinel - Where AI meets blockchain in the ultimate test of digital warfare_
+This project is licensed under the APACHE License - see the LICENSE file for details.

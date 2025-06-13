@@ -20,7 +20,7 @@ export const TEXT_COPIES = {
   },
 }
 
-export const SUI_FAUCET_URL = 'https://docs.sui.io/guides/developer/getting-started/get-coins'
+export const SUI_FAUCET_URL = 'https://faucet.sui.io/'
 
 export const TREASURY_ADDRESS = '0xe4e8af19c2943fc2e3cbefa2fca9149985fc3b3c3d9dd312902b2c26dc600d95'
 export const LOCAL_API_PATH = 'http://54.81.11.64:3000'
@@ -39,3 +39,4 @@ export const MIST_PER_SUI = 1_000_000_000
 export const SUI_TESTNET_BASE_URL = 'https://testnet.suivision.xyz/txblock/'
 export const PROJECT_GITHUB_URL = 'https://github.com/satyambnsal/sui-sentinal'
 export const NAUTILUS_URL = 'https://github.com/MystenLabs/nautilus'
+export const YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v=U3qMdgSGASI'
