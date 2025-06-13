@@ -25,7 +25,7 @@ struct ClaudeContent {
 fn sanitize_explanation(text: &str) -> String {
     text.chars()
         .filter(|c| c.is_ascii_alphabetic() || *c == ' ') // Only A-Z, a-z, and space
-        .take(120)
+        .take(220)
         .collect::<String>()
         .trim()
         .to_string()
