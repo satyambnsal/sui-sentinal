@@ -8,7 +8,7 @@ import { MenuItems } from './MenuItems'
 import { MenuIcon, Plus, YoutubeIcon } from 'lucide-react'
 import Link from 'next/link'
 import { ConnectButton } from './ConnectButton'
-import { PROJECT_GITHUB_URL, YOUTUBE_VIDEO_URL } from '@/constants'
+import { YOUTUBE_VIDEO_URL } from '@/constants'
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -67,18 +67,6 @@ export const Header = () => {
           {menuOpen ? <Plus className="rotate-45 block" /> : <MenuIcon />}
         </button>
 
-        <Link
-          className="block ml-1 xl:ml-4 flex-shrink-0"
-          href={PROJECT_GITHUB_URL}
-          target="_blank"
-        >
-          <Image
-            src={'/icons/github.svg'}
-            width={32}
-            height={32}
-            alt="shield"
-          />
-        </Link>
         <Link
           className="block ml-1 xl:ml-4 flex-shrink-0"
           href={YOUTUBE_VIDEO_URL}
