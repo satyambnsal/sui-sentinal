@@ -53,4 +53,5 @@ export interface AgentDetails {
   cost_per_message: number
   system_prompt: string
   balance: number
+  agent_name: string
 }

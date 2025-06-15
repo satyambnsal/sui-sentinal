@@ -21,7 +21,6 @@ export default function AgentChallengePage() {
   const agentObjectId = params.address as string
   const account = useCurrentAccount()
   const { events: allEvents } = useAgentEvents()
-  console.log('EVENTS', allEvents)
 
   const { refetchAgent } = useAllAgents()
   const { consumePrompt } = useConsumePrompt({
@@ -154,7 +153,7 @@ export default function AgentChallengePage() {
       </div>
     )
   }
-  console.log('Agent events', agentEvents)
+  // console.log('Agent events', agentEvents)
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl">
@@ -168,6 +167,7 @@ export default function AgentChallengePage() {
 
       <div className="bg-gray-900 rounded-lg p-6 mb-8">
         <h1 className="text-3xl font-bold mb-4">Agent: {agent.agent_id}</h1>
+        <h2 className="text-3xl font-bold mb-4">Name: {agent.agent_name}</h2>
 
         <div className="grid grid-cols-1 mb-6 ">
           <AgentInfo

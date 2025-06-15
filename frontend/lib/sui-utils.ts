@@ -14,17 +14,15 @@ export const fetchAgentDetailsViaObject = async (
       },
     })
 
-    console.log('Agent object response:', response)
-
     if (!response.data?.content || response.data.content.dataType !== 'moveObject') {
       throw new Error('Invalid agent object')
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fields = (response.data.content as any).fields
-    console.log('Agent fields:', fields)
 
     return {
+      agent_name: '',
       agent_id: fields.agent_id,
       agent_object_id: fields.id.id,
       creator: fields.creator,

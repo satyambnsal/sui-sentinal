@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useAgentObjectIds } from './useAgentObjectIds'
 import { AgentDetails } from '@/types'
 import { fetchAgentDetailsViaObject } from '@/lib/sui-utils'
 import { useSuiClient } from '@mysten/dapp-kit'
+import { useAgentObjectNames } from './useAgentObjectNames'
 
 interface UseAllAgentsReturn {
   agents: AgentDetails[]
@@ -14,11 +14,11 @@ interface UseAllAgentsReturn {
 
 export const useAllAgents = (): UseAllAgentsReturn => {
   const {
-    agentObjectIds,
+    agentObjectNames,
     loading: idsLoading,
     error: idsError,
-    refetch: refetchIds,
-  } = useAgentObjectIds()
+    refetch: refetchIdWithNames,
+  } = useAgentObjectNames()
   const client = useSuiClient()
   const [agents, setAgents] = useState<AgentDetails[]>([])
 
@@ -43,9 +43,19 @@ export const useAllAgents = (): UseAllAgentsReturn => {
 
         const settledResults = await Promise.all(detailsPromises)
 
-        const successfulAgents = settledResults.filter(
-          (agent): agent is AgentDetails => agent !== null
-        )
+        const successfulAgents = settledResults
+          .filter((agent) => agent !== null)
+          .map((agent) => {
+            const agentObjectId = agent.agent_object_id
+            const entry = agentObjectNames.find((agent) => agent.agentId === agentObjectId)
+            if (entry) {
+              agent.agent_name = entry.agentName
+            } else {
+              agent.agent_name = ''
+            }
+            return agent
+          })
+
         setAgents(successfulAgents)
 
         if (successfulAgents.length !== objectIds.length) {
@@ -58,43 +68,53 @@ export const useAllAgents = (): UseAllAgentsReturn => {
         setDetailsLoading(false)
       }
     },
-    [client]
+    [client, agentObjectNames]
   )
 
   useEffect(() => {
-    if (agentObjectIds.length > 0 && !idsLoading && !idsError) {
+    if (agentObjectNames.length > 0 && !idsLoading && !idsError) {
+      const agentObjectIds = agentObjectNames.map((agent) => agent.agentId)
       fetchAgentDetails(agentObjectIds)
     }
-  }, [agentObjectIds, idsLoading, idsError, fetchAgentDetails])
+  }, [agentObjectNames, idsLoading, idsError, fetchAgentDetails])
 
   const refetchAll = useCallback(async () => {
     try {
-      await refetchIds()
-      if (agentObjectIds.length > 0) {
+      await refetchIdWithNames()
+      if (agentObjectNames.length > 0) {
+        const agentObjectIds = agentObjectNames.map((agent) => agent.agentId)
         await fetchAgentDetails(agentObjectIds)
       }
     } catch (error) {
       console.error('Error refetching all agents:', error)
     }
-  }, [refetchIds, agentObjectIds, fetchAgentDetails])
+  }, [refetchIdWithNames, agentObjectNames, fetchAgentDetails])
 
   const refetchAgent = useCallback(
     async (objectId: string) => {
       try {
         console.log('agetnt object id', objectId)
+
         const updatedAgent = await fetchAgentDetailsViaObject(client, objectId)
         setAgents((prevAgents) =>
           prevAgents.map((agent) =>
             agent.agent_id === updatedAgent.agent_id ? updatedAgent : agent
           )
         )
+
+        const ourAgentName = agentObjectNames.find((agent) => {
+          return agent.agentId === updatedAgent.agent_object_id
+        })
+
+        updatedAgent.agent_name = ourAgentName?.agentName
+
         return updatedAgent
       } catch (error) {
         console.error(`Error refetching agent ${objectId}:`, error)
         throw new Error(`Failed to refetch agent ${objectId}`)
       }
     },
-    [client]
+    [agentObjectNames, client]
   )
 
   return {

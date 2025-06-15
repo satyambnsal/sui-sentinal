@@ -54,9 +54,10 @@ export const AgentsList = ({
                 <div className="h-full w-[1px] bg-[#6F6F6F]" />
                 <p className="col-span-10 pl-4">Agent Id</p>
               </div>
-              <div className="col-span-3 border-l border-l-[#6F6F6F] ps-4">Balance</div>
+              <div className="col-span-2 border-l border-l-[#6F6F6F] ps-4">Name</div>
+              <div className="col-span-2 border-l border-l-[#6F6F6F] ps-4">Balance</div>
               <div className="col-span-2 border-l border-l-[#6F6F6F] ps-4">Message Price</div>
-              <div className="col-span-4 border-l border-l-[#6F6F6F] ps-4">Actions</div>
+              <div className="col-span-3 border-l border-l-[#6F6F6F] ps-4">Actions</div>
             </div>
 
             {/* Agent Rows */}
@@ -83,6 +84,10 @@ export const AgentsList = ({
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <p className="text-gray-400 text-xs">Name</p>
+                          <p>{agent.agent_name}</p>
+                        </div>
                         <div>
                           <p className="text-gray-400 text-xs">Reward</p>
                           <p>{`${balance} SUI`}</p>
@@ -127,9 +132,11 @@ export const AgentsList = ({
                         <div className="h-full w-[1px] bg-[#6F6F6F]" />
                         <div className="col-span-10 pl-4">{agent.agent_id}</div>
                       </div>
-                      <div className="col-span-3 ps-4">{`${balance} SUI`}</div>
+                      <div className="col-span-2 ps-4">{agent.agent_name}</div>
+
+                      <div className="col-span-2 ps-4">{`${balance} SUI`}</div>
                       <div className="col-span-2 ps-4">{`${costPerMessage} SUI`}</div>
-                      <div className="col-span-4 ps-4 flex gap-4">
+                      <div className="col-span-3 ps-4 flex gap-4">
                         <button
                           onClick={() => router.push(`/attack/${agent.agent_object_id}`)}
                           className="text-sm text-red-700 font-bold hover:text-red-500"

@@ -10,7 +10,7 @@ import { MIST_PER_SUI, SUI_CONFIG } from '@/constants'
 import { toast } from 'react-toastify'
 import { hexToVector } from '@/lib/utils'
 import { registerAgentUtil } from './utils'
-import { useAgentObjectIds } from '@/hooks/useAgentObjectIds'
+import { useAgentObjectNames } from '@/hooks/useAgentObjectNames'
 import { FundAgentModal } from '@/components/FundAgentModal'
 import { SuccessModal } from '@/components/DefenderSuccessModal'
 
@@ -67,7 +67,7 @@ const FormInput: React.FC<FormInputProps> = ({
 export default function DefendPage() {
   const client = useSuiClient()
   const account = useCurrentAccount()
-  const { addAgentObjectId } = useAgentObjectIds()
+  const { addAgentObjectIdWithName } = useAgentObjectNames()
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction({
     execute: async ({ bytes, signature }) =>
       await client.executeTransactionBlock({
@@ -198,7 +198,7 @@ export default function DefendPage() {
           if (agentObject) {
             console.log('agent object', agentObject)
             const agentObjectId = (agentObject as any).objectId
-            await addAgentObjectId(agentObjectId)
+            await addAgentObjectIdWithName(`${agentObjectId} ${formData.agentName}`)
             setDeployedAgentObjectId(agentObjectId)
             setTransactionDigest(result.digest.toString())
             setShowSuccessModal(true)
