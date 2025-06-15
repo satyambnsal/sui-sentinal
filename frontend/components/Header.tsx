@@ -8,7 +8,7 @@ import { MenuItems } from './MenuItems'
 import { MenuIcon, Plus, YoutubeIcon } from 'lucide-react'
 import Link from 'next/link'
 import { ConnectButton } from './ConnectButton'
-import { YOUTUBE_VIDEO_URL } from '@/constants'
+import { X_URL, YOUTUBE_VIDEO_URL } from '@/constants'
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -73,6 +73,20 @@ export const Header = () => {
           target="_blank"
         >
           <YoutubeIcon size={32} />
+        </Link>
+
+        <Link
+          href={X_URL}
+          aria-label="Twitter/X"
+          target="_blank"
+          className="ms-3"
+        >
+          <Image
+            src="/icons/x.svg"
+            width={22}
+            height={22}
+            alt="x"
+          />
         </Link>
       </div>
       {menuOpen && (
