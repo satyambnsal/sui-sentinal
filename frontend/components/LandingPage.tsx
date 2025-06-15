@@ -24,7 +24,7 @@ export const LandingPage = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 justify-center mt-8 text-center gap-9 ">
+        <div className="grid grid-cols-2 justify-center pt-8 text-center gap-9  overflow-hidden px-4 pb-4">
           <motion.div
             className="border border-[#558EB4] bg-[#12121266] rounded-lg lg:rounded-2xl p-2 lg:p-4 col-span-2 lg:col-span-1 robo-card attacker group"
             initial={{ opacity: 0, x: -50 }}
@@ -101,7 +101,12 @@ export const LandingPage = () => {
 
             <div className="flex items-center justify-center gap-2 my-2">
               <div>
-                <Image src="/icons/swords.png" width={24} height={24} alt="local police icon" />
+                <Image
+                  src="/icons/swords.png"
+                  width={24}
+                  height={24}
+                  alt="local police icon"
+                />
               </div>
               <p className="text-lg lg:text-[2rem] leading-normal font-medium">ATTACK</p>
             </div>

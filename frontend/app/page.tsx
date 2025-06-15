@@ -5,7 +5,7 @@ import { LandingPage } from '@/components/LandingPage'
 export default function Home() {
   return (
     <>
-      <div className="min-h-[calc(100vh-325px)] overflow-auto flex flex-col justify-center">
+      <div className="min-h-[calc(100vh-325px)] flex flex-col justify-center">
         <LandingPage />
       </div>
       <div className="md:py-20">
