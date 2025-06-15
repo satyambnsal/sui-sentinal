@@ -29,7 +29,7 @@ export const Header = () => {
 
   return (
     <header
-      className={clsx('fixed left-0 right-0 top-0 w-full z-50 transition-all duration-200', {
+      className={clsx('fixed left-0 right-0 top-0 w-full z-50 transition-all duration-200 pt-10', {
         'bg-[#12121266] backdrop-blur-xl': menuOpen || scrolled,
         'bg-transparent': !scrolled && !menuOpen,
       })}
